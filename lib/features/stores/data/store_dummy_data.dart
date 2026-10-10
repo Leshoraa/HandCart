@@ -39,7 +39,7 @@ class StoreDummyData {
       category: 'Convenience',
       description: 'Quick refreshments, late-night snacks & household goods',
       icon: Icons.storefront_rounded,
-      imageUrl: 'https://images.unsplash.com/photo-1604719312566-8912e9227c64?w=500&auto=format&fit=crop&q=80',
+      imageUrl: 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=500&auto=format&fit=crop&q=80',
       note: 'Grab sparkling water pack and rechargeable batteries.',
     ),
   ];

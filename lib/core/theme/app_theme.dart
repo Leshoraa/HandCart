@@ -6,17 +6,25 @@ class AppTheme {
   AppTheme._();
 
   static ThemeData lightTheme([ColorScheme? dynamicColorScheme]) {
-    final ColorScheme scheme = dynamicColorScheme ??
-        ColorScheme.fromSeed(
-          seedColor: AppColors.primary,
-          brightness: Brightness.light,
-          primary: AppColors.primary,
-          onPrimary: AppColors.onPrimary,
-          primaryContainer: AppColors.primaryContainer,
-          onPrimaryContainer: AppColors.onPrimaryContainer,
-          secondary: AppColors.secondary,
-          surface: AppColors.surfaceLight,
-        );
+    final ColorScheme scheme = ColorScheme.fromSeed(
+      seedColor: AppColors.primary,
+      brightness: Brightness.light,
+      primary: AppColors.primary,
+      onPrimary: AppColors.onPrimary,
+      primaryContainer: AppColors.primaryContainer,
+      onPrimaryContainer: AppColors.onPrimaryContainer,
+      secondary: AppColors.secondary,
+      surface: AppColors.surfaceLight,
+      surfaceContainer: const Color(0xFFF2F4F7),
+      surfaceContainerHigh: const Color(0xFFEAEDF1),
+      surfaceContainerHighest: const Color(0xFFE2E6EB),
+      surfaceContainerLow: const Color(0xFFF8F9FA),
+      surfaceContainerLowest: Colors.white,
+      onSurface: AppColors.textPrimaryLight,
+      onSurfaceVariant: AppColors.textSecondaryLight,
+      outline: const Color(0xFFC3C7CA),
+      outlineVariant: const Color(0xFFE2E5E8),
+    );
 
     return ThemeData(
       useMaterial3: true,
@@ -38,14 +46,14 @@ class AppTheme {
       cardTheme: CardThemeData(
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(22.0),
+          borderRadius: BorderRadius.circular(20.0),
         ),
         color: scheme.surfaceContainerLowest,
         clipBehavior: Clip.antiAlias,
       ),
       searchBarTheme: SearchBarThemeData(
         elevation: const WidgetStatePropertyAll(0),
-        backgroundColor: WidgetStatePropertyAll(scheme.surfaceContainerHigh),
+        backgroundColor: WidgetStatePropertyAll(scheme.surfaceContainer),
         shape: const WidgetStatePropertyAll(StadiumBorder()),
         padding: const WidgetStatePropertyAll(
           EdgeInsets.symmetric(horizontal: 16.0),
@@ -56,8 +64,11 @@ class AppTheme {
       ),
       chipTheme: ChipThemeData(
         shape: const StadiumBorder(),
-        side: BorderSide.none,
-        backgroundColor: scheme.surfaceContainerHigh,
+        side: BorderSide(
+          color: scheme.outlineVariant.withValues(alpha: 0.6),
+          width: 1,
+        ),
+        backgroundColor: Colors.white,
         selectedColor: scheme.primaryContainer,
         labelStyle: TextStyle(
           fontWeight: FontWeight.w600,
@@ -73,7 +84,7 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: scheme.surfaceContainerHigh,
+        fillColor: scheme.surfaceContainer,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppDimens.md,
           vertical: AppDimens.sm,
@@ -92,9 +103,9 @@ class AppTheme {
         ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        elevation: 2,
-        backgroundColor: scheme.primaryContainer,
-        foregroundColor: scheme.onPrimaryContainer,
+        elevation: 3,
+        backgroundColor: scheme.primary,
+        foregroundColor: scheme.onPrimary,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16.0),
         ),
@@ -121,12 +132,21 @@ class AppTheme {
   }
 
   static ThemeData darkTheme([ColorScheme? dynamicColorScheme]) {
-    final ColorScheme scheme = dynamicColorScheme ??
-        ColorScheme.fromSeed(
-          seedColor: AppColors.primary,
-          brightness: Brightness.dark,
-          surface: AppColors.surfaceDark,
-        );
+    final ColorScheme scheme = ColorScheme.fromSeed(
+      seedColor: AppColors.primary,
+      brightness: Brightness.dark,
+      primary: const Color(0xFF6CDAA8),
+      onPrimary: const Color(0xFF003825),
+      primaryContainer: const Color(0xFF005238),
+      onPrimaryContainer: const Color(0xFFD6F5E5),
+      surface: AppColors.surfaceDark,
+      surfaceContainer: const Color(0xFF1E2220),
+      surfaceContainerHigh: const Color(0xFF282D2A),
+      surfaceContainerLow: const Color(0xFF181B19),
+      surfaceContainerLowest: const Color(0xFF101211),
+      onSurface: const Color(0xFFE2E4E1),
+      onSurfaceVariant: const Color(0xFFA2A7A3),
+    );
 
     return ThemeData(
       useMaterial3: true,

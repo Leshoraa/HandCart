@@ -34,9 +34,9 @@ class StoreCard extends StatelessWidget {
           BoxShadow(
             color: isDark
                 ? Colors.black.withValues(alpha: 0.25)
-                : Colors.black.withValues(alpha: 0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+                : Colors.black.withValues(alpha: 0.035),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -56,71 +56,65 @@ class StoreCard extends StatelessWidget {
                       top: Radius.circular(19.0),
                     ),
                     child: Container(
-                      height: 108.0,
+                      height: 114.0,
                       width: double.infinity,
-                      color:
-                          colorScheme.surfaceContainerHigh.withValues(alpha: 0.6),
+                      color: colorScheme.surfaceContainerHigh.withValues(alpha: 0.5),
                       child: store.imageUrl != null
                           ? Image.network(
                               store.imageUrl!,
                               fit: BoxFit.cover,
-                              loadingBuilder:
-                                  (context, child, loadingProgress) {
+                              loadingBuilder: (context, child, loadingProgress) {
                                 if (loadingProgress == null) return child;
                                 return Center(
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    value: loadingProgress
-                                                .expectedTotalBytes !=
-                                            null
-                                        ? loadingProgress
-                                                .cumulativeBytesLoaded /
-                                            loadingProgress
-                                                .expectedTotalBytes!
-                                        : null,
+                                  child: SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      value: loadingProgress.expectedTotalBytes != null
+                                          ? loadingProgress.cumulativeBytesLoaded /
+                                              loadingProgress.expectedTotalBytes!
+                                          : null,
+                                    ),
                                   ),
                                 );
                               },
                               errorBuilder: (context, error, stackTrace) =>
-                                  Center(
-                                child: Icon(
-                                  store.icon,
-                                  size: 38,
-                                  color: colorScheme.primary,
-                                ),
-                              ),
+                                  _buildFallbackBanner(colorScheme),
                             )
-                          : Center(
-                              child: Icon(
-                                store.icon,
-                                size: 38,
-                                color: colorScheme.primary,
-                              ),
-                            ),
+                          : _buildFallbackBanner(colorScheme),
                     ),
                   ),
 
-                  // Category Tag Badge
+                  // Frosted Glass Category Tag
                   Positioned(
                     top: 8.0,
                     left: 8.0,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 8.0,
-                        vertical: 3.5,
+                        horizontal: 8.5,
+                        vertical: 4.0,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.55),
-                        borderRadius:
-                            BorderRadius.circular(AppDimens.radiusFull),
+                        color: isDark
+                            ? Colors.black.withValues(alpha: 0.75)
+                            : Colors.white.withValues(alpha: 0.94),
+                        borderRadius: BorderRadius.circular(AppDimens.radiusFull),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.08),
+                            blurRadius: 4,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
                       ),
                       child: Text(
                         store.category,
-                        style: const TextStyle(
-                          fontSize: 10.0,
+                        style: TextStyle(
+                          fontSize: 10.5,
                           fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                          letterSpacing: 0.2,
+                          color: isDark ? Colors.white : const Color(0xFF191C1E),
+                          letterSpacing: 0.1,
                         ),
                       ),
                     ),
@@ -131,34 +125,21 @@ class StoreCard extends StatelessWidget {
               // Store Information & Planned Metrics
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(12.0, 10.0, 12.0, 10.0),
+                  padding: const EdgeInsets.fromLTRB(12.0, 10.0, 12.0, 12.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Store Name
+                      // Store Name (Up to 2 lines for clear readability)
                       Text(
                         store.name,
                         style: TextStyle(
                           fontSize: 14.5,
                           fontWeight: FontWeight.w800,
+                          height: 1.25,
                           color: colorScheme.onSurface,
-                          letterSpacing: -0.3,
+                          letterSpacing: -0.2,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-
-                      const SizedBox(height: 2.0),
-
-                      // Store Description
-                      Text(
-                        store.description,
-                        style: TextStyle(
-                          fontSize: 11.0,
-                          color: colorScheme.onSurfaceVariant
-                              .withValues(alpha: 0.85),
-                        ),
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
 
@@ -172,18 +153,28 @@ class StoreCard extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
-                                  Icons.shopping_basket_outlined,
+                                  itemCount > 0
+                                      ? Icons.shopping_bag_rounded
+                                      : Icons.shopping_bag_outlined,
                                   size: 13.0,
-                                  color: colorScheme.onSurfaceVariant,
+                                  color: itemCount > 0
+                                      ? colorScheme.primary
+                                      : colorScheme.onSurfaceVariant
+                                          .withValues(alpha: 0.7),
                                 ),
-                                const SizedBox(width: 3.0),
+                                const SizedBox(width: 4.0),
                                 Flexible(
                                   child: Text(
                                     '$itemCount ${itemCount == 1 ? "item" : "items"}',
                                     style: TextStyle(
-                                      fontSize: 11.0,
-                                      fontWeight: FontWeight.w600,
-                                      color: colorScheme.onSurfaceVariant,
+                                      fontSize: 11.5,
+                                      fontWeight: itemCount > 0
+                                          ? FontWeight.w700
+                                          : FontWeight.w600,
+                                      color: itemCount > 0
+                                          ? colorScheme.primary
+                                          : colorScheme.onSurfaceVariant
+                                              .withValues(alpha: 0.8),
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -196,11 +187,12 @@ class StoreCard extends StatelessWidget {
                           Text(
                             CurrencyFormatter.format(totalPrice),
                             style: TextStyle(
-                              fontSize: 13.0,
+                              fontSize: 13.5,
                               fontWeight: FontWeight.w900,
                               color: itemCount > 0
                                   ? colorScheme.primary
-                                  : colorScheme.onSurfaceVariant,
+                                  : colorScheme.onSurfaceVariant
+                                      .withValues(alpha: 0.7),
                               letterSpacing: -0.2,
                             ),
                           ),
@@ -211,6 +203,35 @@ class StoreCard extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFallbackBanner(ColorScheme colorScheme) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            colorScheme.primaryContainer.withValues(alpha: 0.5),
+            colorScheme.surfaceContainerHigh,
+          ],
+        ),
+      ),
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: colorScheme.surface.withValues(alpha: 0.85),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            store.icon,
+            size: 26,
+            color: colorScheme.primary,
           ),
         ),
       ),

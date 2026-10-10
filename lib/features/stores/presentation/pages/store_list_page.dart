@@ -186,8 +186,14 @@ class _StoreListPageState extends State<StoreListPage> {
                     selected: isSelected,
                     showCheckmark: false,
                     shape: const StadiumBorder(),
-                    side: BorderSide.none,
-                    backgroundColor: colorScheme.surfaceContainerHigh,
+                    side: isSelected
+                        ? BorderSide.none
+                        : BorderSide(
+                            color: colorScheme.outlineVariant
+                                .withValues(alpha: 0.6),
+                            width: 1,
+                          ),
+                    backgroundColor: Colors.white,
                     selectedColor: colorScheme.primaryContainer,
                     labelStyle: TextStyle(
                       color: isSelected
@@ -302,7 +308,7 @@ class _StoreListPageState extends State<StoreListPage> {
                   crossAxisCount: 2,
                   crossAxisSpacing: 12.0,
                   mainAxisSpacing: 12.0,
-                  mainAxisExtent: 216.0,
+                  mainAxisExtent: 220.0,
                 ),
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
@@ -343,8 +349,8 @@ class _StoreListPageState extends State<StoreListPage> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16.0),
         ),
-        backgroundColor: colorScheme.primaryContainer,
-        foregroundColor: colorScheme.onPrimaryContainer,
+        backgroundColor: colorScheme.primary,
+        foregroundColor: Colors.white,
         icon: const Icon(Icons.add_business_rounded),
         label: const Text(
           AppStrings.addNewStore,
