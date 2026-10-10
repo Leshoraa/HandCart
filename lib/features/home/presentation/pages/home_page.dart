@@ -21,6 +21,7 @@ class _HomePageState extends State<HomePage> {
   String _searchQuery = '';
   DateTime _selectedDate = DateTime.now();
   final TextEditingController _searchController = TextEditingController();
+  final List<Product> _products = List<Product>.from(DummyData.sampleProducts);
 
   @override
   void dispose() {
@@ -29,7 +30,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   List<Product> get _filteredProducts {
-    return DummyData.sampleProducts.where((product) {
+    return _products.where((product) {
       final matchesCategory = _selectedCategory == 'Semua' ||
           product.category == _selectedCategory;
       final matchesSearch = _searchQuery.isEmpty ||
@@ -298,26 +299,255 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: cart.totalCount > 0
-          ? FloatingActionButton.extended(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const CartPage()),
-                );
-              },
-              elevation: 3,
-              shape: const StadiumBorder(),
-              backgroundColor: colorScheme.primary,
-              foregroundColor: colorScheme.onPrimary,
-              icon: const Icon(Icons.shopping_bag_rounded),
-              label: Text(
-                'Keranjang (${cart.totalCount}) • ${CurrencyFormatter.formatRupiah(cart.totalPrice)}',
-                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showAddProductBottomSheet(context),
+        elevation: 3,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18.0),
+        ),
+        backgroundColor: colorScheme.primaryContainer,
+        foregroundColor: colorScheme.onPrimaryContainer,
+        child: const Icon(
+          Icons.add_rounded,
+          size: 28,
+        ),
+      ),
+      bottomNavigationBar: cart.totalCount > 0
+          ? SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: Material(
+                  elevation: 4,
+                  shadowColor: Colors.black26,
+                  borderRadius: BorderRadius.circular(AppDimens.radiusFull),
+                  color: colorScheme.primary,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(AppDimens.radiusFull),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const CartPage()),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 14,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.shopping_bag_rounded,
+                            color: colorScheme.onPrimary,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            'Keranjang (${cart.totalCount})',
+                            style: TextStyle(
+                              color: colorScheme.onPrimary,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            CurrencyFormatter.formatRupiah(cart.totalPrice),
+                            style: TextStyle(
+                              color: colorScheme.onPrimary,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ),
             )
           : null,
+    );
+  }
+
+  void _showAddProductBottomSheet(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final nameController = TextEditingController();
+    final priceController = TextEditingController();
+    String selectedCategory = DummyData.categories[1]; // 'Minuman'
+    IconData selectedIcon = Icons.local_cafe_rounded;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28.0)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+                left: 20,
+                right: 20,
+                top: 20,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 36,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Tambah Produk Baru',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: nameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Nama Produk',
+                        prefixIcon: Icon(Icons.label_outline_rounded),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: priceController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Harga (Rp)',
+                        prefixIcon: Icon(Icons.payments_outlined),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Kategori',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: DummyData.categories
+                          .where((c) => c != 'Semua')
+                          .map((category) {
+                        final isSel = category == selectedCategory;
+                        return ChoiceChip(
+                          label: Text(category),
+                          selected: isSel,
+                          shape: const StadiumBorder(),
+                          side: BorderSide.none,
+                          backgroundColor: colorScheme.surfaceContainerHigh,
+                          selectedColor: colorScheme.primaryContainer,
+                          labelStyle: TextStyle(
+                            color: isSel
+                                ? colorScheme.onPrimaryContainer
+                                : colorScheme.onSurfaceVariant,
+                            fontWeight:
+                                isSel ? FontWeight.w800 : FontWeight.w600,
+                          ),
+                          onSelected: (selected) {
+                            if (selected) {
+                              setModalState(() {
+                                selectedCategory = category;
+                                if (category == 'Minuman') {
+                                  selectedIcon = Icons.local_cafe_rounded;
+                                } else if (category == 'Makanan') {
+                                  selectedIcon = Icons.bakery_dining_rounded;
+                                } else if (category == 'Snack') {
+                                  selectedIcon = Icons.fastfood_rounded;
+                                } else if (category == 'Kebutuhan Dapur') {
+                                  selectedIcon = Icons.soup_kitchen_rounded;
+                                } else {
+                                  selectedIcon = Icons.shopping_bag_rounded;
+                                }
+                              });
+                            }
+                          },
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: FilledButton(
+                        onPressed: () {
+                          final name = nameController.text.trim();
+                          final price =
+                              double.tryParse(priceController.text.trim()) ?? 0;
+                          if (name.isEmpty || price <= 0) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Harap masukkan nama dan harga yang valid'),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                            return;
+                          }
+
+                          final newProduct = Product(
+                            id: 'p_${DateTime.now().millisecondsSinceEpoch}',
+                            name: name,
+                            category: selectedCategory,
+                            price: price,
+                            description: 'Produk $selectedCategory baru ditambahkan.',
+                            icon: selectedIcon,
+                            rating: 5.0,
+                          );
+
+                          setState(() {
+                            _products.insert(0, newProduct);
+                          });
+
+                          Navigator.pop(ctx);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Produk "$name" berhasil ditambahkan!'),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        },
+                        style: FilledButton.styleFrom(
+                          shape: const StadiumBorder(),
+                        ),
+                        child: const Text(
+                          'Simpan Produk',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
