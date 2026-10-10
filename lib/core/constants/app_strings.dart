@@ -1,6 +1,7 @@
 class AppStrings {
   AppStrings._();
 
+  // App Identity
   static const String appName = 'HandCart';
   static const String appTagline = 'Smart Shopping Cart & Retail Assistant';
 
@@ -10,6 +11,10 @@ class AppStrings {
   static const String allCategories = 'All';
   static const String addToCart = 'Add';
   static const String addedToCart = 'added to cart';
+  static const String selectDate = 'SELECT DATE';
+  static const String productsSuffix = 'products';
+  static const String noMatchingProducts = 'No matching products found';
+  static const String cartPrefix = 'Cart';
 
   // Cart Page
   static const String cartTitle = 'Shopping Cart';
@@ -27,4 +32,17 @@ class AppStrings {
       'Are you sure you want to empty the entire cart?';
   static const String cancel = 'Cancel';
   static const String yes = 'Yes';
+  static const String orderSuccessTitle = 'Order Successful!';
+  static const String orderSuccessMessage =
+      'Thank you for shopping with HandCart. Your order will be processed shortly.';
+  static const String done = 'Done';
+
+  // Product Creation Modal
+  static const String addNewProduct = 'Add New Product';
+  static const String productName = 'Product Name';
+  static const String price = 'Price';
+  static const String category = 'Category';
+  static const String saveProduct = 'Save Product';
+  static const String validationErrorProduct =
+      'Please enter a valid product name and price';
 }

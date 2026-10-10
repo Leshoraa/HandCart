@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_dimens.dart';
+import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../cart/state/cart_scope.dart';
 import '../../data/models/product_model.dart';
@@ -46,7 +47,7 @@ class _ProductCardState extends State<ProductCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Visual Container (Dynamic Tint Squircle)
+          // Visual thumbnail container
           Expanded(
             child: Container(
               width: double.infinity,
@@ -56,7 +57,6 @@ class _ProductCardState extends State<ProductCard> {
               ),
               child: Stack(
                 children: [
-                  // Product Icon (Preserved as requested)
                   Center(
                     child: Icon(
                       widget.product.icon,
@@ -65,7 +65,7 @@ class _ProductCardState extends State<ProductCard> {
                     ),
                   ),
 
-                  // Favorite Heart Button (Top-Left)
+                  // Favorite toggle
                   Positioned(
                     top: 8,
                     left: 8,
@@ -106,7 +106,7 @@ class _ProductCardState extends State<ProductCard> {
                     ),
                   ),
 
-                  // Rating Pill (Top-Right)
+                  // Rating badge
                   Positioned(
                     top: 8,
                     right: 8,
@@ -155,7 +155,6 @@ class _ProductCardState extends State<ProductCard> {
 
           const SizedBox(height: 12),
 
-          // Title
           Text(
             widget.product.name,
             maxLines: 1,
@@ -170,7 +169,6 @@ class _ProductCardState extends State<ProductCard> {
 
           const SizedBox(height: 2),
 
-          // Subtitle / Category
           Text(
             widget.product.category,
             maxLines: 1,
@@ -184,9 +182,8 @@ class _ProductCardState extends State<ProductCard> {
 
           const SizedBox(height: 6),
 
-          // Price
           Text(
-            CurrencyFormatter.formatRupiah(widget.product.price),
+            CurrencyFormatter.format(widget.product.price),
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w900,
@@ -196,7 +193,6 @@ class _ProductCardState extends State<ProductCard> {
 
           const SizedBox(height: 10),
 
-          // Action Button (Material 3 Expressive Tonal Pill Button)
           if (quantity == 0)
             SizedBox(
               width: double.infinity,
@@ -206,7 +202,9 @@ class _ProductCardState extends State<ProductCard> {
                   cart.addItem(widget.product);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('${widget.product.name} added to cart'),
+                      content: Text(
+                        '${widget.product.name} ${AppStrings.addedToCart}',
+                      ),
                       duration: const Duration(seconds: 1),
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(
@@ -227,7 +225,7 @@ class _ProductCardState extends State<ProductCard> {
                     Icon(Icons.add_rounded, size: 18),
                     SizedBox(width: 4),
                     Text(
-                      'Add',
+                      AppStrings.addToCart,
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w800,

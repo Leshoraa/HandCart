@@ -3,6 +3,7 @@ import '../../../../core/constants/app_dimens.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/empty_state_view.dart';
+import '../../state/cart_controller.dart';
 import '../../state/cart_scope.dart';
 import '../widgets/cart_item_tile.dart';
 
@@ -65,7 +66,7 @@ class CartPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSummarySheet(BuildContext context, dynamic cart) {
+  Widget _buildSummarySheet(BuildContext context, CartController cart) {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
@@ -93,7 +94,7 @@ class CartPage extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  CurrencyFormatter.formatRupiah(cart.subtotal),
+                  CurrencyFormatter.format(cart.subtotal),
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
                     color: colorScheme.onSurface,
@@ -113,7 +114,7 @@ class CartPage extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  CurrencyFormatter.formatRupiah(cart.tax),
+                  CurrencyFormatter.format(cart.tax),
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
                     color: colorScheme.onSurface,
@@ -134,7 +135,7 @@ class CartPage extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  CurrencyFormatter.formatRupiah(cart.totalPrice),
+                  CurrencyFormatter.format(cart.totalPrice),
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w900,
@@ -216,11 +217,11 @@ class CartPage extends StatelessWidget {
           size: 48,
         ),
         title: const Text(
-          'Order Successful!',
+          AppStrings.orderSuccessTitle,
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         content: const Text(
-          'Thank you for shopping with HandCart. Your order will be processed shortly.',
+          AppStrings.orderSuccessMessage,
           textAlign: TextAlign.center,
         ),
         actionsAlignment: MainAxisAlignment.center,
@@ -235,7 +236,7 @@ class CartPage extends StatelessWidget {
               shape: const StadiumBorder(),
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
             ),
-            child: const Text('Done'),
+            child: const Text(AppStrings.done),
           ),
         ],
       ),

@@ -26,10 +26,10 @@ class DateFormatter {
     'Dec',
   ];
 
-  /// Formats a [DateTime] into relative English date text:
-  /// - Today -> "Today"
-  /// - Yesterday -> "Yesterday"
-  /// - Older dates -> e.g. "Tuesday, Jan 19, 2026"
+  /// Formats a [DateTime] into a relative or formatted date string:
+  /// - Returns 'Today' if [date] matches current calendar day.
+  /// - Returns 'Yesterday' if [date] was the previous calendar day.
+  /// - Returns formatted '[DayName], [MonthName] [Day], [Year]' for other dates.
   static String formatRelativeDate(DateTime date) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -38,12 +38,13 @@ class DateFormatter {
 
     if (difference == 0) {
       return 'Today';
-    } else if (difference == 1) {
-      return 'Yesterday';
-    } else {
-      final dayName = _days[date.weekday - 1];
-      final monthName = _months[date.month - 1];
-      return '$dayName, $monthName ${date.day}, ${date.year}';
     }
+    if (difference == 1) {
+      return 'Yesterday';
+    }
+
+    final dayName = _days[date.weekday - 1];
+    final monthName = _months[date.month - 1];
+    return '$dayName, $monthName ${date.day}, ${date.year}';
   }
 }

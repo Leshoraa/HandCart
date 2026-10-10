@@ -24,6 +24,8 @@ class CartItem {
 }
 
 class CartController extends ChangeNotifier {
+  static const double defaultTaxRate = 0.11;
+
   final Map<String, CartItem> _items = {};
 
   List<CartItem> get items => _items.values.toList();
@@ -36,7 +38,7 @@ class CartController extends ChangeNotifier {
     return _items.values.fold(0.0, (sum, item) => sum + item.totalPrice);
   }
 
-  double get tax => subtotal * 0.11; // PPN 11%
+  double get tax => subtotal * defaultTaxRate;
 
   double get totalPrice => subtotal + tax;
 
@@ -44,6 +46,10 @@ class CartController extends ChangeNotifier {
 
   int getQuantity(String productId) {
     return _items[productId]?.quantity ?? 0;
+  }
+
+  bool containsProduct(String productId) {
+    return _items.containsKey(productId);
   }
 
   void addItem(Product product) {

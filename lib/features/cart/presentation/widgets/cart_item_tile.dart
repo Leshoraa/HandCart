@@ -57,7 +57,6 @@ class CartItemTile extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           child: Row(
             children: [
-              // Product Icon Box
               ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: Container(
@@ -72,8 +71,6 @@ class CartItemTile extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppDimens.md),
-
-              // Title and Price
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,7 +87,7 @@ class CartItemTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      CurrencyFormatter.formatRupiah(item.product.price),
+                      CurrencyFormatter.format(item.product.price),
                       style: TextStyle(
                         color: colorScheme.onSurfaceVariant,
                         fontSize: 12,
@@ -99,7 +96,7 @@ class CartItemTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      CurrencyFormatter.formatRupiah(item.totalPrice),
+                      CurrencyFormatter.format(item.totalPrice),
                       style: TextStyle(
                         color: colorScheme.primary,
                         fontWeight: FontWeight.w800,
@@ -109,8 +106,6 @@ class CartItemTile extends StatelessWidget {
                   ],
                 ),
               ),
-
-              // Quantity Controls (M3 Expressive Pill Stepper)
               Container(
                 height: 36,
                 decoration: BoxDecoration(

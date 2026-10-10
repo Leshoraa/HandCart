@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_dimens.dart';
 import '../../../../core/constants/app_strings.dart';
-import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../cart/presentation/pages/cart_page.dart';
 import '../../../cart/state/cart_scope.dart';
 import '../../data/dummy_data.dart';
 import '../../data/models/product_model.dart';
+import '../widgets/add_product_bottom_sheet.dart';
+import '../widgets/home_cart_bottom_bar.dart';
 import '../widgets/product_card.dart';
 
 class HomePage extends StatefulWidget {
@@ -17,15 +18,22 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String _selectedCategory = 'All';
+  String _selectedCategory = AppStrings.allCategories;
   String _searchQuery = '';
   DateTime _selectedDate = DateTime.now();
-  final TextEditingController _searchController = TextEditingController();
+  late final TextEditingController _searchController;
   final List<Product> _products = List<Product>.from(DummyData.sampleProducts);
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+  }
 
   @override
   void reassemble() {
     super.reassemble();
+    // Synchronize catalog data on debug hot reload
     _products.clear();
     _products.addAll(DummyData.sampleProducts);
   }
@@ -38,13 +46,53 @@ class _HomePageState extends State<HomePage> {
 
   List<Product> get _filteredProducts {
     return _products.where((product) {
-      final matchesCategory = _selectedCategory == 'All' ||
+      final matchesCategory = _selectedCategory == AppStrings.allCategories ||
           product.category == _selectedCategory;
       final matchesSearch = _searchQuery.isEmpty ||
           product.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           product.category.toLowerCase().contains(_searchQuery.toLowerCase());
       return matchesCategory && matchesSearch;
     }).toList();
+  }
+
+  void _onCategorySelected(String category) {
+    setState(() {
+      _selectedCategory = category;
+    });
+  }
+
+  void _onSearchChanged(String value) {
+    setState(() {
+      _searchQuery = value.trim();
+    });
+  }
+
+  void _onClearSearch() {
+    _searchController.clear();
+    setState(() {
+      _searchQuery = '';
+    });
+  }
+
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+      helpText: AppStrings.selectDate,
+    );
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
+  }
+
+  void _onAddNewProduct(Product product) {
+    setState(() {
+      _products.insert(0, product);
+    });
   }
 
   @override
@@ -87,7 +135,7 @@ class _HomePageState extends State<HomePage> {
       ),
       body: CustomScrollView(
         slivers: [
-          // M3 Expressive Pill Search Bar
+          // Search Bar
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(
@@ -114,24 +162,15 @@ class _HomePageState extends State<HomePage> {
                   if (_searchQuery.isNotEmpty)
                     IconButton(
                       icon: const Icon(Icons.clear_rounded),
-                      onPressed: () {
-                        _searchController.clear();
-                        setState(() {
-                          _searchQuery = '';
-                        });
-                      },
+                      onPressed: _onClearSearch,
                     ),
                 ],
-                onChanged: (value) {
-                  setState(() {
-                    _searchQuery = value.trim();
-                  });
-                },
+                onChanged: _onSearchChanged,
               ),
             ),
           ),
 
-          // M3 Expressive Categories Filter
+          // Horizontal Category Filter Chips
           SliverToBoxAdapter(
             child: SizedBox(
               height: 44,
@@ -164,9 +203,7 @@ class _HomePageState extends State<HomePage> {
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                     onSelected: (selected) {
                       if (selected) {
-                        setState(() {
-                          _selectedCategory = category;
-                        });
+                        _onCategorySelected(category);
                       }
                     },
                   );
@@ -175,7 +212,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          // Section Title
+          // Date & Count Section Header
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(
@@ -189,27 +226,14 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   InkWell(
                     borderRadius: BorderRadius.circular(12),
-                    onTap: () async {
-                      final picked = await showDatePicker(
-                        context: context,
-                        initialDate: _selectedDate,
-                        firstDate: DateTime(2020),
-                        lastDate: DateTime(2030),
-                        helpText: 'SELECT DATE',
-                      );
-                      if (picked != null) {
-                        setState(() {
-                          _selectedDate = picked;
-                        });
-                      }
-                    },
+                    onTap: _pickDate,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 4.0),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            _selectedCategory == 'All'
+                            _selectedCategory == AppStrings.allCategories
                                 ? DateFormatter.formatRelativeDate(_selectedDate)
                                 : _selectedCategory,
                             style: TextStyle(
@@ -219,7 +243,7 @@ class _HomePageState extends State<HomePage> {
                               color: colorScheme.onSurface,
                             ),
                           ),
-                          if (_selectedCategory == 'All') ...[
+                          if (_selectedCategory == AppStrings.allCategories) ...[
                             const SizedBox(width: 6),
                             Icon(
                               Icons.calendar_today_rounded,
@@ -242,7 +266,7 @@ class _HomePageState extends State<HomePage> {
                           BorderRadius.circular(AppDimens.radiusFull),
                     ),
                     child: Text(
-                      '${_filteredProducts.length} products',
+                      '${_filteredProducts.length} ${AppStrings.productsSuffix}',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
@@ -255,7 +279,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          // Products Grid (Expressive Spacing & Aspect Ratio)
+          // Products Grid
           if (_filteredProducts.isEmpty)
             SliverFillRemaining(
               hasScrollBody: false,
@@ -270,7 +294,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     const SizedBox(height: AppDimens.md),
                     Text(
-                      'No matching products found',
+                      AppStrings.noMatchingProducts,
                       style: TextStyle(
                         fontSize: 16,
                         color: colorScheme.onSurfaceVariant,
@@ -308,7 +332,10 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddProductBottomSheet(context),
+        onPressed: () => AddProductBottomSheet.show(
+          context,
+          onProductAdded: _onAddNewProduct,
+        ),
         elevation: 3,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18.0),
@@ -320,241 +347,7 @@ class _HomePageState extends State<HomePage> {
           size: 28,
         ),
       ),
-      bottomNavigationBar: cart.totalCount > 0
-          ? SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                child: Material(
-                  elevation: 4,
-                  shadowColor: Colors.black26,
-                  borderRadius: BorderRadius.circular(AppDimens.radiusFull),
-                  color: colorScheme.primary,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(AppDimens.radiusFull),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const CartPage()),
-                      );
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 14,
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.shopping_bag_rounded,
-                            color: colorScheme.onPrimary,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            'Cart (${cart.totalCount})',
-                            style: TextStyle(
-                              color: colorScheme.onPrimary,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const Spacer(),
-                          Text(
-                            CurrencyFormatter.formatRupiah(cart.totalPrice),
-                            style: TextStyle(
-                              color: colorScheme.onPrimary,
-                              fontWeight: FontWeight.w900,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            )
-          : null,
-    );
-  }
-
-  void _showAddProductBottomSheet(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final nameController = TextEditingController();
-    final priceController = TextEditingController();
-    String selectedCategory = DummyData.categories[1]; // 'Beverages'
-    IconData selectedIcon = Icons.local_cafe_rounded;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28.0)),
-      ),
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Padding(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-                left: 20,
-                right: 20,
-                top: 20,
-              ),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 36,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Add New Product',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Product Name',
-                        prefixIcon: Icon(Icons.label_outline_rounded),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: priceController,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(
-                        labelText: 'Price',
-                        prefixIcon: Icon(Icons.attach_money_rounded),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Category',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: DummyData.categories
-                          .where((c) => c != 'All')
-                          .map((category) {
-                        final isSel = category == selectedCategory;
-                        return ChoiceChip(
-                          label: Text(category),
-                          selected: isSel,
-                          shape: const StadiumBorder(),
-                          side: BorderSide.none,
-                          backgroundColor: colorScheme.surfaceContainerHigh,
-                          selectedColor: colorScheme.primaryContainer,
-                          labelStyle: TextStyle(
-                            color: isSel
-                                ? colorScheme.onPrimaryContainer
-                                : colorScheme.onSurfaceVariant,
-                            fontWeight:
-                                isSel ? FontWeight.w800 : FontWeight.w600,
-                          ),
-                          onSelected: (selected) {
-                            if (selected) {
-                              setModalState(() {
-                                selectedCategory = category;
-                                if (category == 'Beverages') {
-                                  selectedIcon = Icons.local_cafe_rounded;
-                                } else if (category == 'Food') {
-                                  selectedIcon = Icons.bakery_dining_rounded;
-                                } else if (category == 'Snacks') {
-                                  selectedIcon = Icons.fastfood_rounded;
-                                } else if (category == 'Pantry') {
-                                  selectedIcon = Icons.soup_kitchen_rounded;
-                                } else {
-                                  selectedIcon = Icons.shopping_bag_rounded;
-                                }
-                              });
-                            }
-                          },
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 48,
-                      child: FilledButton(
-                        onPressed: () {
-                          final name = nameController.text.trim();
-                          final price =
-                              double.tryParse(priceController.text.trim()) ?? 0;
-                          if (name.isEmpty || price <= 0) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Please enter a valid product name and price'),
-                                behavior: SnackBarBehavior.floating,
-                              ),
-                            );
-                            return;
-                          }
-
-                          final newProduct = Product(
-                            id: 'p_${DateTime.now().millisecondsSinceEpoch}',
-                            name: name,
-                            category: selectedCategory,
-                            price: price,
-                            description: 'Newly added $selectedCategory product.',
-                            icon: selectedIcon,
-                            rating: 5.0,
-                          );
-
-                          setState(() {
-                            _products.insert(0, newProduct);
-                          });
-
-                          Navigator.pop(ctx);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Product "$name" added successfully!'),
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
-                        },
-                        style: FilledButton.styleFrom(
-                          shape: const StadiumBorder(),
-                        ),
-                        child: const Text(
-                          'Save Product',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 15,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
+      bottomNavigationBar: HomeCartBottomBar(cart: cart),
     );
   }
 }
