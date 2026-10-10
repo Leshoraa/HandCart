@@ -297,7 +297,13 @@ class _StoreListPageState extends State<StoreListPage> {
           else
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: AppDimens.md),
-              sliver: SliverList(
+              sliver: SliverGrid(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12.0,
+                  mainAxisSpacing: 12.0,
+                  mainAxisExtent: 216.0,
+                ),
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
                     final store = filteredStores[index];
