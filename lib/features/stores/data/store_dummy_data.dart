@@ -1,0 +1,188 @@
+import 'package:flutter/material.dart';
+import 'models/store_model.dart';
+import '../../shopping_list/data/models/product_model.dart';
+
+class StoreDummyData {
+  StoreDummyData._();
+
+  static const List<Store> initialStores = [
+    Store(
+      id: 'store_1',
+      name: 'Grand Fresh Market',
+      category: 'Supermarket',
+      description: 'Daily fresh produce, organic dairy & pantry essentials',
+      icon: Icons.local_grocery_store_rounded,
+      imageUrl: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=500&auto=format&fit=crop&q=80',
+      note: 'Check milk expiration date; buy organic apples if available; use loyalty member card at checkout.',
+    ),
+    Store(
+      id: 'store_2',
+      name: 'Artisan Bakery & Cafe',
+      category: 'Bakery',
+      description: 'Handcrafted sourdough, golden croissants & specialty brews',
+      icon: Icons.bakery_dining_rounded,
+      imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&auto=format&fit=crop&q=80',
+      note: 'Ask for sourdough loaf pre-sliced; pick up before 11:00 AM while warm.',
+    ),
+    Store(
+      id: 'store_3',
+      name: 'Green Leaf Organic Mart',
+      category: 'Organic Store',
+      description: 'Clean pantry essentials, superfoods & healthy snacks',
+      icon: Icons.eco_rounded,
+      imageUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&auto=format&fit=crop&q=80',
+      note: 'Bring reusable canvas bags for environmental discount; check cold-pressed coconut oil.',
+    ),
+    Store(
+      id: 'store_4',
+      name: 'Daily Corner Mart',
+      category: 'Convenience',
+      description: 'Quick refreshments, late-night snacks & household goods',
+      icon: Icons.storefront_rounded,
+      imageUrl: 'https://images.unsplash.com/photo-1604719312566-8912e9227c64?w=500&auto=format&fit=crop&q=80',
+      note: 'Grab sparkling water pack and rechargeable batteries.',
+    ),
+  ];
+
+  static const List<Product> initialProducts = [
+    // Store 1: Grand Fresh Market
+    Product(
+      id: 'prod_101',
+      storeId: 'store_1',
+      name: 'Organic Whole Milk',
+      category: 'Dairy',
+      price: 3.50,
+      description: '1 Liter pasteurized whole milk, rich in calcium',
+      icon: Icons.local_drink_rounded,
+      rating: 4.9,
+      imageUrl: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=500&auto=format&fit=crop&q=80',
+    ),
+    Product(
+      id: 'prod_102',
+      storeId: 'store_1',
+      name: 'Crisp Honeycrisp Apples',
+      category: 'Produce',
+      price: 4.20,
+      description: '1 kg sweet, juicy and fresh orchard-picked apples',
+      icon: Icons.apple_rounded,
+      rating: 4.8,
+      imageUrl: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=500&auto=format&fit=crop&q=80',
+    ),
+    Product(
+      id: 'prod_103',
+      storeId: 'store_1',
+      name: 'Omega-3 Fresh Eggs',
+      category: 'Dairy & Eggs',
+      price: 3.80,
+      description: 'Carton of 10 farm-fresh Grade A organic eggs',
+      icon: Icons.egg_rounded,
+      rating: 4.9,
+      imageUrl: 'https://images.unsplash.com/photo-1516448620398-c5f44bf9f441?w=500&auto=format&fit=crop&q=80',
+    ),
+    Product(
+      id: 'prod_104',
+      storeId: 'store_1',
+      name: 'Hydroponic Spinach',
+      category: 'Produce',
+      price: 2.10,
+      description: '250g tender green spinach leaves, washed & ready',
+      icon: Icons.eco_rounded,
+      rating: 4.7,
+      imageUrl: 'https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=500&auto=format&fit=crop&q=80',
+    ),
+
+    // Store 2: Artisan Bakery & Cafe
+    Product(
+      id: 'prod_201',
+      storeId: 'store_2',
+      name: 'Artisan Sourdough Bread',
+      category: 'Bakery',
+      price: 6.00,
+      description: 'Naturally fermented whole wheat sourdough with crispy crust',
+      icon: Icons.bakery_dining_rounded,
+      rating: 4.9,
+      imageUrl: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=500&auto=format&fit=crop&q=80',
+    ),
+    Product(
+      id: 'prod_202',
+      storeId: 'store_2',
+      name: 'Butter French Croissant',
+      category: 'Bakery',
+      price: 3.50,
+      description: 'Flaky golden laminated pastry made with Normandy butter',
+      icon: Icons.bakery_dining_rounded,
+      rating: 4.8,
+      imageUrl: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=500&auto=format&fit=crop&q=80',
+    ),
+    Product(
+      id: 'prod_203',
+      storeId: 'store_2',
+      name: 'Palm Sugar Iced Latte',
+      category: 'Coffee',
+      price: 4.50,
+      description: 'Double espresso with oat milk and organic palm sugar syrup',
+      icon: Icons.local_cafe_rounded,
+      rating: 4.9,
+      imageUrl: 'https://images.unsplash.com/photo-1517256064527-09c73fc73e38?w=500&auto=format&fit=crop&q=80',
+    ),
+
+    // Store 3: Green Leaf Organic Mart
+    Product(
+      id: 'prod_301',
+      storeId: 'store_3',
+      name: 'Extra Virgin Coconut Oil',
+      category: 'Pantry',
+      price: 12.00,
+      description: '500ml cold-pressed unrefined raw organic coconut oil',
+      icon: Icons.soup_kitchen_rounded,
+      rating: 4.9,
+      imageUrl: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=500&auto=format&fit=crop&q=80',
+    ),
+    Product(
+      id: 'prod_302',
+      storeId: 'store_3',
+      name: 'Crispy Tempeh Chips',
+      category: 'Snacks',
+      price: 3.00,
+      description: 'Traditional savory tempeh crisps seasoned with coriander',
+      icon: Icons.fastfood_rounded,
+      rating: 4.6,
+      imageUrl: 'https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=500&auto=format&fit=crop&q=80',
+    ),
+    Product(
+      id: 'prod_303',
+      storeId: 'store_3',
+      name: 'Eco Canvas Shopping Tote',
+      category: 'Accessories',
+      price: 8.00,
+      description: 'Reusable heavy-duty organic cotton tote bag',
+      icon: Icons.shopping_bag_rounded,
+      rating: 4.8,
+      imageUrl: 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=500&auto=format&fit=crop&q=80',
+    ),
+
+    // Store 4: Daily Corner Mart
+    Product(
+      id: 'prod_401',
+      storeId: 'store_4',
+      name: 'Sparkling Mineral Water',
+      category: 'Beverages',
+      price: 1.80,
+      description: '500ml chilled natural sparkling water with light citrus',
+      icon: Icons.local_drink_rounded,
+      rating: 4.5,
+      imageUrl: 'https://images.unsplash.com/photo-1527661591475-527312dd65f5?w=500&auto=format&fit=crop&q=80',
+    ),
+    Product(
+      id: 'prod_402',
+      storeId: 'store_4',
+      name: 'Dark Chocolate Almond Bar',
+      category: 'Snacks',
+      price: 2.50,
+      description: '70% dark chocolate bar filled with roasted California almonds',
+      icon: Icons.fastfood_rounded,
+      rating: 4.8,
+      imageUrl: 'https://images.unsplash.com/photo-1549007994-cb92caebd54b?w=500&auto=format&fit=crop&q=80',
+    ),
+  ];
+}

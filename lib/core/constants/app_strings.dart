@@ -3,46 +3,41 @@ class AppStrings {
 
   // App Identity
   static const String appName = 'HandCart';
-  static const String appTagline = 'Smart Shopping Cart & Retail Assistant';
+  static const String appTagline = 'Smart Shopping List & Expense Tracker';
 
-  // Home Page
-  static const String searchHint = 'Search products or categories...';
-  static const String featuredProducts = 'Featured Products';
-  static const String allCategories = 'All';
+  // Store List Page
+  static const String storesTitle = 'Shopping Places';
+  static const String storesSubtitle = 'Select a store to manage your shopping list';
+  static const String searchStoresHint = 'Search stores or categories...';
+  static const String allStores = 'All Stores';
+  static const String addNewStore = 'Add Store';
+  static const String storeName = 'Store Name';
+  static const String storeCategory = 'Category';
+  static const String storeDescription = 'Description';
+  static const String saveStore = 'Save Store';
+
+  // Store Product List Page
+  static const String searchProductsHint = 'Search items in this store...';
+  static const String noProductsFound = 'No items found in this store';
+  static const String totalExpense = 'Total Expense';
+  static const String itemsPlanned = 'items planned';
+  static const String singleItemPlanned = 'item planned';
+  static const String addNewItem = 'Add Item';
+  static const String itemName = 'Item Name';
+  static const String itemPrice = 'Estimated Price';
+  static const String saveItem = 'Save Item';
+
+  // Shopping Notes Sheet
+  static const String shoppingNotes = 'Shopping Notes';
+  static const String notesSubtitle = 'Memos, checklist & reminders for this store';
+  static const String notesHint = 'e.g. Check expiry date, look for buy 1 get 1 promo, bring discount coupons...';
+  static const String saveNotes = 'Save Notes';
+  static const String notesUpdated = 'Shopping notes updated successfully';
+
+  // Actions & Common
   static const String addToCart = 'Add';
-  static const String addedToCart = 'added to cart';
-  static const String selectDate = 'SELECT DATE';
-  static const String productsSuffix = 'products';
-  static const String noMatchingProducts = 'No matching products found';
-  static const String cartPrefix = 'Cart';
-
-  // Cart Page
-  static const String cartTitle = 'Shopping Cart';
-  static const String emptyCartTitle = 'Your cart is empty';
-  static const String emptyCartSubtitle =
-      'Explore our catalog and find your favorite items!';
-  static const String startShopping = 'Start Shopping';
-  static const String orderSummary = 'Order Summary';
-  static const String subtotal = 'Subtotal';
-  static const String tax = 'Tax (11%)';
-  static const String total = 'Total';
-  static const String checkout = 'Checkout';
-  static const String clearCart = 'Clear';
-  static const String confirmClearCart =
-      'Are you sure you want to empty the entire cart?';
+  static const String addedToCart = 'added to list';
+  static const String clearList = 'Clear';
   static const String cancel = 'Cancel';
-  static const String yes = 'Yes';
-  static const String orderSuccessTitle = 'Order Successful!';
-  static const String orderSuccessMessage =
-      'Thank you for shopping with HandCart. Your order will be processed shortly.';
   static const String done = 'Done';
-
-  // Product Creation Modal
-  static const String addNewProduct = 'Add New Product';
-  static const String productName = 'Product Name';
-  static const String price = 'Price';
-  static const String category = 'Category';
-  static const String saveProduct = 'Save Product';
-  static const String validationErrorProduct =
-      'Please enter a valid product name and price';
 }

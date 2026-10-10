@@ -1,45 +1,41 @@
 import 'package:flutter/material.dart';
 
-class Product {
+class Store {
   final String id;
   final String name;
   final String category;
-  final double price;
   final String description;
   final IconData icon;
-  final double rating;
   final String? imageUrl;
+  final String note;
 
-  const Product({
+  const Store({
     required this.id,
     required this.name,
     required this.category,
-    required this.price,
     required this.description,
     required this.icon,
-    this.rating = 4.8,
     this.imageUrl,
+    this.note = '',
   });
 
-  Product copyWith({
+  Store copyWith({
     String? id,
     String? name,
     String? category,
-    double? price,
     String? description,
     IconData? icon,
-    double? rating,
     String? imageUrl,
+    String? note,
   }) {
-    return Product(
+    return Store(
       id: id ?? this.id,
       name: name ?? this.name,
       category: category ?? this.category,
-      price: price ?? this.price,
       description: description ?? this.description,
       icon: icon ?? this.icon,
-      rating: rating ?? this.rating,
       imageUrl: imageUrl ?? this.imageUrl,
+      note: note ?? this.note,
     );
   }
 }

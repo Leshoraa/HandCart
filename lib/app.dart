@@ -2,9 +2,9 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'core/constants/app_strings.dart';
 import 'core/theme/app_theme.dart';
-import 'features/cart/state/cart_controller.dart';
-import 'features/cart/state/cart_scope.dart';
-import 'features/home/presentation/pages/home_page.dart';
+import 'features/shopping_list/state/shopping_planner_controller.dart';
+import 'features/shopping_list/state/shopping_planner_scope.dart';
+import 'features/stores/presentation/pages/store_list_page.dart';
 
 class HandCartApp extends StatefulWidget {
   const HandCartApp({super.key});
@@ -14,24 +14,24 @@ class HandCartApp extends StatefulWidget {
 }
 
 class _HandCartAppState extends State<HandCartApp> {
-  late final CartController _cartController;
+  late final ShoppingPlannerController _plannerController;
 
   @override
   void initState() {
     super.initState();
-    _cartController = CartController();
+    _plannerController = ShoppingPlannerController();
   }
 
   @override
   void dispose() {
-    _cartController.dispose();
+    _plannerController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return CartScope(
-      controller: _cartController,
+    return ShoppingPlannerScope(
+      controller: _plannerController,
       child: DynamicColorBuilder(
         builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
           return MaterialApp(
@@ -40,7 +40,7 @@ class _HandCartAppState extends State<HandCartApp> {
             theme: AppTheme.lightTheme(lightDynamic),
             darkTheme: AppTheme.darkTheme(darkDynamic),
             themeMode: ThemeMode.system,
-            home: const HomePage(),
+            home: const StoreListPage(),
           );
         },
       ),

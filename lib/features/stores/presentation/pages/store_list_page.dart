@@ -1,28 +1,24 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_dimens.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/date_formatter.dart';
-import '../../../cart/presentation/pages/cart_page.dart';
-import '../../../cart/state/cart_scope.dart';
-import '../../data/dummy_data.dart';
-import '../../data/models/product_model.dart';
-import '../widgets/add_product_bottom_sheet.dart';
-import '../widgets/home_cart_bottom_bar.dart';
-import '../widgets/product_card.dart';
+import '../../../shopping_list/presentation/pages/store_product_list_page.dart';
+import '../../../shopping_list/state/shopping_planner_scope.dart';
+import '../widgets/add_store_bottom_sheet.dart';
+import '../widgets/store_card.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class StoreListPage extends StatefulWidget {
+  const StoreListPage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<StoreListPage> createState() => _StoreListPageState();
 }
 
-class _HomePageState extends State<HomePage> {
-  String _selectedCategory = AppStrings.allCategories;
-  String _searchQuery = '';
-  DateTime _selectedDate = DateTime.now();
+class _StoreListPageState extends State<StoreListPage> {
   late final TextEditingController _searchController;
-  final List<Product> _products = List<Product>.from(DummyData.sampleProducts);
+  String _selectedCategory = AppStrings.allStores;
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -31,33 +27,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
-  void reassemble() {
-    super.reassemble();
-    _products.clear();
-    _products.addAll(DummyData.sampleProducts);
-  }
-
-  @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
-  }
-
-  List<Product> get _filteredProducts {
-    return _products.where((product) {
-      final matchesCategory = _selectedCategory == AppStrings.allCategories ||
-          product.category == _selectedCategory;
-      final matchesSearch = _searchQuery.isEmpty ||
-          product.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          product.category.toLowerCase().contains(_searchQuery.toLowerCase());
-      return matchesCategory && matchesSearch;
-    }).toList();
-  }
-
-  void _onCategorySelected(String category) {
-    setState(() {
-      _selectedCategory = category;
-    });
   }
 
   void _onSearchChanged(String value) {
@@ -66,67 +38,89 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void _onClearSearch() {
-    _searchController.clear();
+  void _onCategorySelected(String category) {
     setState(() {
-      _searchQuery = '';
-    });
-  }
-
-  Future<void> _pickDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2030),
-      helpText: AppStrings.selectDate,
-    );
-    if (picked != null) {
-      setState(() {
-        _selectedDate = picked;
-      });
-    }
-  }
-
-  void _onAddNewProduct(Product product) {
-    setState(() {
-      _products.insert(0, product);
+      _selectedCategory = category;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final cart = CartScope.of(context);
+    final planner = ShoppingPlannerScope.of(context);
     final colorScheme = Theme.of(context).colorScheme;
+    final totalExpenseAll = planner.getTotalPlannedExpense();
+    final totalCountAll = planner.getTotalPlannedCount();
+
+    // Extract unique store categories
+    final categories = [
+      AppStrings.allStores,
+      ...planner.stores.map((s) => s.category).toSet(),
+    ];
+
+    final filteredStores = planner.stores.where((store) {
+      final matchesCategory = _selectedCategory == AppStrings.allStores ||
+          store.category == _selectedCategory;
+      final matchesSearch = _searchQuery.isEmpty ||
+          store.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          store.category.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          store.description.toLowerCase().contains(_searchQuery.toLowerCase());
+      return matchesCategory && matchesSearch;
+    }).toList();
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
         titleSpacing: AppDimens.md,
-        title: Text(
-          AppStrings.appName,
-          style: TextStyle(
-            fontWeight: FontWeight.w900,
-            fontSize: 22,
-            letterSpacing: -0.5,
-            color: colorScheme.onSurface,
-          ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              AppStrings.appName,
+              style: TextStyle(
+                fontWeight: FontWeight.w900,
+                fontSize: 22,
+                letterSpacing: -0.5,
+                color: colorScheme.onSurface,
+              ),
+            ),
+            Text(
+              DateFormatter.formatRelativeDate(DateTime.now()),
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
         ),
         actions: [
+          // Total Budget Indicator Badge
           Padding(
             padding: const EdgeInsets.only(right: AppDimens.md),
-            child: IconButton.filledTonal(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const CartPage()),
-                );
-              },
-              icon: Badge(
-                isLabelVisible: cart.totalCount > 0,
-                label: Text('${cart.totalCount}'),
-                backgroundColor: colorScheme.error,
-                child: const Icon(Icons.shopping_cart_outlined, size: 20),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(AppDimens.radiusFull),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.account_balance_wallet_rounded,
+                    size: 16,
+                    color: colorScheme.onPrimaryContainer,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    CurrencyFormatter.format(totalExpenseAll),
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      color: colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -145,7 +139,7 @@ class _HomePageState extends State<HomePage> {
               ),
               child: SearchBar(
                 controller: _searchController,
-                hintText: AppStrings.searchHint,
+                hintText: AppStrings.searchStoresHint,
                 elevation: const WidgetStatePropertyAll(0),
                 backgroundColor:
                     WidgetStatePropertyAll(colorScheme.surfaceContainerHigh),
@@ -161,7 +155,12 @@ class _HomePageState extends State<HomePage> {
                   if (_searchQuery.isNotEmpty)
                     IconButton(
                       icon: const Icon(Icons.clear_rounded),
-                      onPressed: _onClearSearch,
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() {
+                          _searchQuery = '';
+                        });
+                      },
                     ),
                 ],
                 onChanged: _onSearchChanged,
@@ -176,11 +175,11 @@ class _HomePageState extends State<HomePage> {
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: AppDimens.md),
-                itemCount: DummyData.categories.length,
+                itemCount: categories.length,
                 separatorBuilder: (context, index) =>
                     const SizedBox(width: AppDimens.sm),
                 itemBuilder: (context, index) {
-                  final category = DummyData.categories[index];
+                  final category = categories[index];
                   final isSelected = category == _selectedCategory;
                   return FilterChip(
                     label: Text(category),
@@ -211,7 +210,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          // Section Header: Retail Headline, Relative Date Subtitle & Count Badge
+          // Section Header: Store Places & Total Planned Summary
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(
@@ -222,50 +221,28 @@ class _HomePageState extends State<HomePage> {
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  InkWell(
-                    borderRadius: BorderRadius.circular(12),
-                    onTap: _pickDate,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 2.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _selectedCategory == AppStrings.allCategories
-                                ? AppStrings.featuredProducts
-                                : _selectedCategory,
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: -0.5,
-                              color: colorScheme.onSurface,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.calendar_today_rounded,
-                                size: 13,
-                                color: colorScheme.primary,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                DateFormatter.formatRelativeDate(_selectedDate),
-                                style: TextStyle(
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.w600,
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        AppStrings.storesTitle,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -0.5,
+                          color: colorScheme.onSurface,
+                        ),
                       ),
-                    ),
+                      Text(
+                        '$totalCountAll ${AppStrings.itemsPlanned} across all stores',
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -278,7 +255,7 @@ class _HomePageState extends State<HomePage> {
                           BorderRadius.circular(AppDimens.radiusFull),
                     ),
                     child: Text(
-                      '${_filteredProducts.length} ${AppStrings.productsSuffix}',
+                      '${filteredStores.length} stores',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
@@ -291,8 +268,8 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          // Products Grid (Balanced 0.72 Aspect Ratio)
-          if (_filteredProducts.isEmpty)
+          // Store Cards List
+          if (filteredStores.isEmpty)
             SliverFillRemaining(
               hasScrollBody: false,
               child: Center(
@@ -300,17 +277,17 @@ class _HomePageState extends State<HomePage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      Icons.search_off_rounded,
+                      Icons.storefront_outlined,
                       size: 64,
                       color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                     ),
-                    const SizedBox(height: AppDimens.md),
+                    const SizedBox(height: 12),
                     Text(
-                      AppStrings.noMatchingProducts,
+                      'No matching shopping places found',
                       style: TextStyle(
-                        fontSize: 16,
-                        color: colorScheme.onSurfaceVariant,
+                        fontSize: 15,
                         fontWeight: FontWeight.w700,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -320,33 +297,41 @@ class _HomePageState extends State<HomePage> {
           else
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: AppDimens.md),
-              sliver: SliverGrid(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.72,
-                  crossAxisSpacing: 14,
-                  mainAxisSpacing: 14,
-                ),
+              sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
-                    final product = _filteredProducts[index];
-                    return ProductCard(product: product);
+                    final store = filteredStores[index];
+                    final itemCount = planner.getStoreItemCount(store.id);
+                    final totalPrice = planner.getStoreTotalPrice(store.id);
+                    return StoreCard(
+                      store: store,
+                      itemCount: itemCount,
+                      totalPrice: totalPrice,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => StoreProductListPage(store: store),
+                          ),
+                        );
+                      },
+                    );
                   },
-                  childCount: _filteredProducts.length,
+                  childCount: filteredStores.length,
                 ),
               ),
             ),
 
           const SliverToBoxAdapter(
-            child: SizedBox(height: AppDimens.xl * 2 + 16),
+            child: SizedBox(height: AppDimens.xl * 3),
           ),
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => AddProductBottomSheet.show(
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => AddStoreBottomSheet.show(
           context,
-          onProductAdded: _onAddNewProduct,
+          onStoreAdded: planner.addStore,
         ),
         elevation: 3,
         shape: RoundedRectangleBorder(
@@ -354,12 +339,12 @@ class _HomePageState extends State<HomePage> {
         ),
         backgroundColor: colorScheme.primaryContainer,
         foregroundColor: colorScheme.onPrimaryContainer,
-        child: const Icon(
-          Icons.add_rounded,
-          size: 28,
+        icon: const Icon(Icons.add_business_rounded),
+        label: const Text(
+          AppStrings.addNewStore,
+          style: TextStyle(fontWeight: FontWeight.w800),
         ),
       ),
-      bottomNavigationBar: HomeCartBottomBar(cart: cart),
     );
   }
 }
