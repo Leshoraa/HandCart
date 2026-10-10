@@ -33,21 +33,21 @@ class AppTheme {
       colorScheme: scheme,
       scaffoldBackgroundColor: scheme.surface,
       appBarTheme: AppBarTheme(
-        centerTitle: false,
+        centerTitle: true,
         elevation: 0,
         backgroundColor: scheme.surface,
         scrolledUnderElevation: 0,
         titleTextStyle: TextStyle(
           color: scheme.onSurface,
-          fontSize: 22,
-          fontWeight: FontWeight.w800,
-          letterSpacing: -0.5,
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+          letterSpacing: -0.2,
         ),
       ),
       cardTheme: CardThemeData(
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.0),
+          borderRadius: BorderRadius.circular(24.0),
         ),
         color: scheme.surfaceContainerLowest,
         clipBehavior: Clip.antiAlias,
@@ -64,9 +64,11 @@ class AppTheme {
         ),
       ),
       chipTheme: ChipThemeData(
-        shape: const StadiumBorder(),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
         side: BorderSide(
-          color: scheme.outlineVariant.withValues(alpha: 0.6),
+          color: scheme.outlineVariant.withValues(alpha: 0.8),
           width: 1,
         ),
         backgroundColor: Colors.white,

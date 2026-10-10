@@ -25,9 +25,9 @@ class StoreCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: isDark ? colorScheme.surfaceContainer : Colors.white,
-        borderRadius: BorderRadius.circular(20.0),
+        borderRadius: BorderRadius.circular(24.0),
         border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.35),
+          color: colorScheme.outlineVariant.withValues(alpha: 0.4),
           width: 1.0,
         ),
         boxShadow: [
@@ -43,7 +43,7 @@ class StoreCard extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(20.0),
+          borderRadius: BorderRadius.circular(24.0),
           onTap: onTap,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,10 +53,10 @@ class StoreCard extends StatelessWidget {
                 children: [
                   ClipRRect(
                     borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(19.0),
+                      top: Radius.circular(23.0),
                     ),
                     child: Container(
-                      height: 114.0,
+                      height: 118.0,
                       width: double.infinity,
                       color: colorScheme.surfaceContainerHigh.withValues(alpha: 0.5),
                       child: store.imageUrl != null
@@ -125,19 +125,32 @@ class StoreCard extends StatelessWidget {
               // Store Information & Planned Metrics
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(12.0, 10.0, 12.0, 12.0),
+                  padding: const EdgeInsets.fromLTRB(14.0, 12.0, 14.0, 12.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Store Name (Up to 2 lines for clear readability)
+                      // Store Name (Title)
                       Text(
                         store.name,
                         style: TextStyle(
-                          fontSize: 14.5,
-                          fontWeight: FontWeight.w800,
-                          height: 1.25,
+                          fontSize: 15.0,
+                          fontWeight: FontWeight.w700,
                           color: colorScheme.onSurface,
                           letterSpacing: -0.2,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+
+                      const SizedBox(height: 4.0),
+
+                      // Supporting line text (Description)
+                      Text(
+                        store.description,
+                        style: TextStyle(
+                          fontSize: 12.0,
+                          color: colorScheme.onSurfaceVariant,
+                          height: 1.3,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -212,27 +225,38 @@ class StoreCard extends StatelessWidget {
   Widget _buildFallbackBanner(ColorScheme colorScheme) {
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            colorScheme.primaryContainer.withValues(alpha: 0.5),
-            colorScheme.surfaceContainerHigh,
-          ],
-        ),
+        color: colorScheme.surfaceContainerHigh.withValues(alpha: 0.6),
       ),
       child: Center(
-        child: Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: colorScheme.surface.withValues(alpha: 0.85),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            store.icon,
-            size: 26,
-            color: colorScheme.primary,
-          ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.change_history_rounded,
+              size: 26,
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.35),
+            ),
+            const SizedBox(height: 2),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.emergency_rounded,
+                  size: 22,
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.35),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  width: 18,
+                  height: 18,
+                  decoration: BoxDecoration(
+                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.35),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

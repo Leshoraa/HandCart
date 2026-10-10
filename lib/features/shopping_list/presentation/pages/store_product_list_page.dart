@@ -195,14 +195,24 @@ class _StoreProductListPageState extends State<StoreProductListPage> {
                 padding: const WidgetStatePropertyAll(
                   EdgeInsets.symmetric(horizontal: 16.0),
                 ),
-                leading: Icon(
-                  Icons.search_rounded,
-                  color: colorScheme.onSurfaceVariant,
-                ),
+                leading: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.arrow_back_rounded),
+                        onPressed: () {
+                          _searchController.clear();
+                          setState(() {
+                            _searchQuery = '';
+                          });
+                        },
+                      )
+                    : Icon(
+                        Icons.search_rounded,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                 trailing: [
                   if (_searchQuery.isNotEmpty)
                     IconButton(
-                      icon: const Icon(Icons.clear_rounded),
+                      icon: const Icon(Icons.close_rounded),
                       onPressed: () {
                         _searchController.clear();
                         setState(() {
@@ -210,6 +220,10 @@ class _StoreProductListPageState extends State<StoreProductListPage> {
                         });
                       },
                     ),
+                  IconButton(
+                    icon: const Icon(Icons.mic_rounded),
+                    onPressed: () {},
+                  ),
                 ],
                 onChanged: _onSearchChanged,
               ),
