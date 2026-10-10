@@ -14,13 +14,9 @@ class HandCartApp extends StatefulWidget {
 }
 
 class _HandCartAppState extends State<HandCartApp> {
-  late final ShoppingPlannerController _plannerController;
+  late final ShoppingPlannerController _plannerController =
+      ShoppingPlannerController();
 
-  @override
-  void initState() {
-    super.initState();
-    _plannerController = ShoppingPlannerController();
-  }
 
   @override
   void dispose() {
