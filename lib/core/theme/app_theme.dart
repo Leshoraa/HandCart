@@ -27,53 +27,92 @@ class AppTheme {
         centerTitle: false,
         elevation: 0,
         backgroundColor: scheme.surface,
-        scrolledUnderElevation: 1.5,
-        titleTextStyle: const TextStyle(
-          color: Colors.black87,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
+        scrolledUnderElevation: 0,
+        titleTextStyle: TextStyle(
+          color: scheme.onSurface,
+          fontSize: 22,
+          fontWeight: FontWeight.w800,
           letterSpacing: -0.5,
         ),
       ),
       cardTheme: CardThemeData(
-        elevation: AppDimens.elevationLow,
+        elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppDimens.radiusMd),
+          borderRadius: BorderRadius.circular(24.0),
         ),
-        color: Colors.white,
+        color: scheme.surfaceContainerLowest,
+        clipBehavior: Clip.antiAlias,
+      ),
+      searchBarTheme: SearchBarThemeData(
+        elevation: const WidgetStatePropertyAll(0),
+        backgroundColor: WidgetStatePropertyAll(scheme.surfaceContainerHigh),
+        shape: const WidgetStatePropertyAll(StadiumBorder()),
+        padding: const WidgetStatePropertyAll(
+          EdgeInsets.symmetric(horizontal: 16.0),
+        ),
+        hintStyle: WidgetStatePropertyAll(
+          TextStyle(color: scheme.onSurfaceVariant, fontSize: 14),
+        ),
+      ),
+      chipTheme: ChipThemeData(
+        shape: const StadiumBorder(),
+        side: BorderSide.none,
+        backgroundColor: scheme.surfaceContainerHigh,
+        selectedColor: scheme.primaryContainer,
+        labelStyle: TextStyle(
+          fontWeight: FontWeight.w600,
+          color: scheme.onSurfaceVariant,
+          fontSize: 13,
+        ),
+        secondaryLabelStyle: TextStyle(
+          fontWeight: FontWeight.w700,
+          color: scheme.onPrimaryContainer,
+          fontSize: 13,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.grey.shade100,
+        fillColor: scheme.surfaceContainerHigh,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppDimens.md,
           vertical: AppDimens.sm,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppDimens.radiusMd),
+          borderRadius: BorderRadius.circular(24.0),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppDimens.radiusMd),
+          borderRadius: BorderRadius.circular(24.0),
           borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppDimens.radiusMd),
-          borderSide: BorderSide(color: scheme.primary, width: 1.5),
+          borderRadius: BorderRadius.circular(24.0),
+          borderSide: BorderSide(color: scheme.primary, width: 2),
         ),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        elevation: 2,
+        backgroundColor: scheme.primary,
+        foregroundColor: scheme.onPrimary,
+        shape: const StadiumBorder(),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           elevation: 0,
           backgroundColor: scheme.primary,
           foregroundColor: scheme.onPrimary,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppDimens.radiusMd),
-          ),
+          shape: const StadiumBorder(),
           padding: const EdgeInsets.symmetric(
             horizontal: AppDimens.lg,
             vertical: AppDimens.md,
           ),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          shape: const StadiumBorder(),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         ),
       ),
     );
@@ -96,49 +135,92 @@ class AppTheme {
         centerTitle: false,
         elevation: 0,
         backgroundColor: scheme.surface,
-        scrolledUnderElevation: 1.5,
-        titleTextStyle: const TextStyle(
-          color: Colors.white,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
+        scrolledUnderElevation: 0,
+        titleTextStyle: TextStyle(
+          color: scheme.onSurface,
+          fontSize: 22,
+          fontWeight: FontWeight.w800,
           letterSpacing: -0.5,
         ),
       ),
       cardTheme: CardThemeData(
-        elevation: AppDimens.elevationLow,
+        elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppDimens.radiusMd),
+          borderRadius: BorderRadius.circular(24.0),
         ),
-        color: const Color(0xFF242A27),
+        color: scheme.surfaceContainerLow,
+        clipBehavior: Clip.antiAlias,
+      ),
+      searchBarTheme: SearchBarThemeData(
+        elevation: const WidgetStatePropertyAll(0),
+        backgroundColor: WidgetStatePropertyAll(scheme.surfaceContainerHigh),
+        shape: const WidgetStatePropertyAll(StadiumBorder()),
+        padding: const WidgetStatePropertyAll(
+          EdgeInsets.symmetric(horizontal: 16.0),
+        ),
+        hintStyle: WidgetStatePropertyAll(
+          TextStyle(color: scheme.onSurfaceVariant, fontSize: 14),
+        ),
+      ),
+      chipTheme: ChipThemeData(
+        shape: const StadiumBorder(),
+        side: BorderSide.none,
+        backgroundColor: scheme.surfaceContainerHigh,
+        selectedColor: scheme.primaryContainer,
+        labelStyle: TextStyle(
+          fontWeight: FontWeight.w600,
+          color: scheme.onSurfaceVariant,
+          fontSize: 13,
+        ),
+        secondaryLabelStyle: TextStyle(
+          fontWeight: FontWeight.w700,
+          color: scheme.onPrimaryContainer,
+          fontSize: 13,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: const Color(0xFF242A27),
+        fillColor: scheme.surfaceContainerHigh,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppDimens.md,
           vertical: AppDimens.sm,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppDimens.radiusMd),
+          borderRadius: BorderRadius.circular(24.0),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(24.0),
           borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppDimens.radiusMd),
-          borderSide: BorderSide(color: scheme.primaryContainer, width: 1.5),
+          borderRadius: BorderRadius.circular(24.0),
+          borderSide: BorderSide(color: scheme.primaryContainer, width: 2),
         ),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        elevation: 2,
+        backgroundColor: scheme.primaryContainer,
+        foregroundColor: scheme.onPrimaryContainer,
+        shape: const StadiumBorder(),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           elevation: 0,
           backgroundColor: scheme.primaryContainer,
           foregroundColor: scheme.onPrimaryContainer,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppDimens.radiusMd),
-          ),
+          shape: const StadiumBorder(),
           padding: const EdgeInsets.symmetric(
             horizontal: AppDimens.lg,
             vertical: AppDimens.md,
           ),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          shape: const StadiumBorder(),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         ),
       ),
     );

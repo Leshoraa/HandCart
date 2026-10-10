@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../constants/app_colors.dart';
 import '../constants/app_dimens.dart';
 
 class EmptyStateView extends StatelessWidget {
@@ -29,13 +28,13 @@ class EmptyStateView extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(AppDimens.lg),
               decoration: BoxDecoration(
-                color: AppColors.primaryContainer.withValues(alpha: 0.3),
+                color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.35),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 icon,
                 size: 64,
-                color: AppColors.primary,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
             const SizedBox(height: AppDimens.lg),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimens.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/currency_formatter.dart';
@@ -13,21 +12,29 @@ class CartPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cart = CartScope.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        title: const Text(AppStrings.cartTitle),
+        title: const Text(
+          AppStrings.cartTitle,
+          style: TextStyle(fontWeight: FontWeight.w800),
+        ),
         actions: [
           if (!cart.isEmpty)
-            TextButton(
-              onPressed: () {
-                _showClearConfirmation(context, cart.clear);
-              },
-              child: const Text(
-                AppStrings.clearCart,
-                style: TextStyle(
-                  color: Colors.red,
-                  fontWeight: FontWeight.w600,
+            Padding(
+              padding: const EdgeInsets.only(right: AppDimens.sm),
+              child: TextButton(
+                onPressed: () {
+                  _showClearConfirmation(context, cart.clear);
+                },
+                child: Text(
+                  AppStrings.clearCart,
+                  style: TextStyle(
+                    color: colorScheme.error,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ),
@@ -59,20 +66,15 @@ class CartPage extends StatelessWidget {
   }
 
   Widget _buildSummarySheet(BuildContext context, dynamic cart) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       padding: const EdgeInsets.all(AppDimens.lg),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardTheme.color ?? Colors.white,
+        color: colorScheme.surfaceContainer,
         borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(AppDimens.radiusLg),
+          top: Radius.circular(28.0),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            offset: const Offset(0, -4),
-            blurRadius: 16,
-          ),
-        ],
       ),
       child: SafeArea(
         top: false,
@@ -83,13 +85,19 @@ class CartPage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   AppStrings.subtotal,
-                  style: TextStyle(color: Colors.grey),
+                  style: TextStyle(
+                    color: colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 Text(
                   CurrencyFormatter.formatRupiah(cart.subtotal),
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: colorScheme.onSurface,
+                  ),
                 ),
               ],
             ),
@@ -97,13 +105,19 @@ class CartPage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   AppStrings.tax,
-                  style: TextStyle(color: Colors.grey),
+                  style: TextStyle(
+                    color: colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 Text(
                   CurrencyFormatter.formatRupiah(cart.tax),
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: colorScheme.onSurface,
+                  ),
                 ),
               ],
             ),
@@ -111,33 +125,41 @@ class CartPage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   AppStrings.total,
                   style: TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w800,
+                    color: colorScheme.onSurface,
                   ),
                 ),
                 Text(
                   CurrencyFormatter.formatRupiah(cart.totalPrice),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
+                    fontWeight: FontWeight.w900,
+                    color: colorScheme.primary,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: AppDimens.md),
-            ElevatedButton(
-              onPressed: () {
-                _showSuccessCheckoutDialog(context, cart.clear);
-              },
-              child: const Text(
-                AppStrings.checkout,
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
+            SizedBox(
+              height: 48,
+              child: FilledButton.icon(
+                onPressed: () {
+                  _showSuccessCheckoutDialog(context, cart.clear);
+                },
+                icon: const Icon(Icons.check_rounded),
+                label: const Text(
+                  AppStrings.checkout,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                style: FilledButton.styleFrom(
+                  shape: const StadiumBorder(),
                 ),
               ),
             ),
@@ -147,25 +169,32 @@ class CartPage extends StatelessWidget {
     );
   }
 
-  void _showClearConfirmation(
-      BuildContext context, VoidCallback onConfirm) {
+  void _showClearConfirmation(BuildContext context, VoidCallback onConfirm) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text(AppStrings.clearCart),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        title: const Text(
+          AppStrings.clearCart,
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         content: const Text(AppStrings.confirmClearCart),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: const Text(AppStrings.cancel),
           ),
-          ElevatedButton(
+          FilledButton(
             onPressed: () {
               Navigator.pop(ctx);
               onConfirm();
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+            style: FilledButton.styleFrom(
+              backgroundColor: colorScheme.error,
+              foregroundColor: colorScheme.onError,
+              shape: const StadiumBorder(),
             ),
             child: const Text(AppStrings.yes),
           ),
@@ -174,27 +203,38 @@ class CartPage extends StatelessWidget {
     );
   }
 
-  void _showSuccessCheckoutDialog(
-      BuildContext context, VoidCallback onClear) {
+  void _showSuccessCheckoutDialog(BuildContext context, VoidCallback onClear) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        icon: const Icon(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        icon: Icon(
           Icons.check_circle_rounded,
-          color: AppColors.success,
+          color: colorScheme.primary,
           size: 48,
         ),
-        title: const Text('Pesanan Berhasil!'),
+        title: const Text(
+          'Pesanan Berhasil!',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         content: const Text(
           'Terima kasih telah berbelanja menggunakan HandCart. Pesanan Anda segera diproses.',
+          textAlign: TextAlign.center,
         ),
+        actionsAlignment: MainAxisAlignment.center,
         actions: [
-          ElevatedButton(
+          FilledButton(
             onPressed: () {
               Navigator.pop(ctx);
               onClear();
               Navigator.pop(context);
             },
+            style: FilledButton.styleFrom(
+              shape: const StadiumBorder(),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+            ),
             child: const Text('Selesai'),
           ),
         ],

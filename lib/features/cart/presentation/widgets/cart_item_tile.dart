@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimens.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../state/cart_controller.dart';
@@ -16,6 +15,7 @@ class CartItemTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cart = CartScope.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Dismissible(
       key: Key(item.product.id),
@@ -24,36 +24,51 @@ class CartItemTile extends StatelessWidget {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: AppDimens.lg),
         decoration: BoxDecoration(
-          color: Colors.red.shade400,
-          borderRadius: BorderRadius.circular(AppDimens.radiusMd),
+          color: colorScheme.errorContainer,
+          borderRadius: BorderRadius.circular(20),
         ),
-        child: const Icon(
+        child: Icon(
           Icons.delete_outline_rounded,
-          color: Colors.white,
+          color: colorScheme.onErrorContainer,
           size: 28,
         ),
       ),
       onDismissed: (_) {
         cart.deleteItem(item.product.id);
       },
-      child: Card(
-        margin: const EdgeInsets.only(bottom: AppDimens.sm),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: AppDimens.sm + 2),
+        decoration: BoxDecoration(
+          color: colorScheme.brightness == Brightness.light
+              ? colorScheme.surfaceContainerLowest
+              : colorScheme.surfaceContainer,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: colorScheme.brightness == Brightness.light
+                  ? Colors.black.withValues(alpha: 0.07)
+                  : Colors.black.withValues(alpha: 0.35),
+              blurRadius: 14,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
         child: Padding(
-          padding: const EdgeInsets.all(AppDimens.sm + 4),
+          padding: const EdgeInsets.all(12),
           child: Row(
             children: [
               // Product Icon Box
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: AppColors.primaryContainer.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(AppDimens.radiusSm),
-                ),
-                child: Icon(
-                  item.product.icon,
-                  color: AppColors.primary,
-                  size: 28,
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  width: 56,
+                  height: 56,
+                  color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
+                  child: Icon(
+                    item.product.icon,
+                    color: colorScheme.primary,
+                    size: 28,
+                  ),
                 ),
               ),
               const SizedBox(width: AppDimens.md),
@@ -65,9 +80,10 @@ class CartItemTile extends StatelessWidget {
                   children: [
                     Text(
                       item.product.name,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
                         fontSize: 14,
+                        color: colorScheme.onSurface,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -76,53 +92,59 @@ class CartItemTile extends StatelessWidget {
                     Text(
                       CurrencyFormatter.formatRupiah(item.product.price),
                       style: TextStyle(
-                        color: Colors.grey.shade600,
+                        color: colorScheme.onSurfaceVariant,
                         fontSize: 12,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       CurrencyFormatter.formatRupiah(item.totalPrice),
-                      style: const TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13,
+                      style: TextStyle(
+                        color: colorScheme.primary,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14,
                       ),
                     ),
                   ],
                 ),
               ),
 
-              // Quantity Controls
+              // Quantity Controls (M3 Expressive Pill Stepper)
               Container(
+                height: 36,
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade300),
-                  borderRadius: BorderRadius.circular(AppDimens.radiusSm),
+                  color: colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(AppDimens.radiusFull),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.remove, size: 16),
-                      padding: const EdgeInsets.all(4),
+                      icon: Icon(
+                        Icons.remove_rounded,
+                        size: 16,
+                        color: colorScheme.onPrimaryContainer,
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
                       constraints: const BoxConstraints(),
                       onPressed: () => cart.removeSingleItem(item.product.id),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppDimens.sm,
-                      ),
-                      child: Text(
-                        '${item.quantity}',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                        ),
+                    Text(
+                      '${item.quantity}',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13,
+                        color: colorScheme.onPrimaryContainer,
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.add, size: 16),
-                      padding: const EdgeInsets.all(4),
+                      icon: Icon(
+                        Icons.add_rounded,
+                        size: 16,
+                        color: colorScheme.onPrimaryContainer,
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
                       constraints: const BoxConstraints(),
                       onPressed: () => cart.addItem(item.product),
                     ),
