@@ -6,25 +6,26 @@ class AppTheme {
   AppTheme._();
 
   static ThemeData lightTheme([ColorScheme? dynamicColorScheme]) {
-    final ColorScheme scheme = ColorScheme.fromSeed(
-      seedColor: AppColors.primary,
-      brightness: Brightness.light,
-      primary: AppColors.primary,
-      onPrimary: AppColors.onPrimary,
-      primaryContainer: AppColors.primaryContainer,
-      onPrimaryContainer: AppColors.onPrimaryContainer,
-      secondary: AppColors.secondary,
-      surface: AppColors.surfaceLight,
-      surfaceContainer: const Color(0xFFF2F4F7),
-      surfaceContainerHigh: const Color(0xFFEAEDF1),
-      surfaceContainerHighest: const Color(0xFFE2E6EB),
-      surfaceContainerLow: const Color(0xFFF8F9FA),
-      surfaceContainerLowest: Colors.white,
-      onSurface: AppColors.textPrimaryLight,
-      onSurfaceVariant: AppColors.textSecondaryLight,
-      outline: const Color(0xFFC3C7CA),
-      outlineVariant: const Color(0xFFE2E5E8),
-    );
+    final ColorScheme scheme = dynamicColorScheme ??
+        ColorScheme.fromSeed(
+          seedColor: AppColors.primary,
+          brightness: Brightness.light,
+          primary: AppColors.primary,
+          onPrimary: AppColors.onPrimary,
+          primaryContainer: AppColors.primaryContainer,
+          onPrimaryContainer: AppColors.onPrimaryContainer,
+          secondary: AppColors.secondary,
+          surface: AppColors.surfaceLight,
+          surfaceContainer: const Color(0xFFF0F4EF),
+          surfaceContainerHigh: const Color(0xFFE8ECE7),
+          surfaceContainerHighest: const Color(0xFFDFE4DE),
+          surfaceContainerLow: const Color(0xFFF7F9F6),
+          surfaceContainerLowest: Colors.white,
+          onSurface: AppColors.textPrimaryLight,
+          onSurfaceVariant: AppColors.textSecondaryLight,
+          outline: const Color(0xFFC2C8C2),
+          outlineVariant: const Color(0xFFDEE4DD),
+        );
 
     return ThemeData(
       useMaterial3: true,
@@ -132,9 +133,10 @@ class AppTheme {
   }
 
   static ThemeData darkTheme([ColorScheme? dynamicColorScheme]) {
-    final ColorScheme scheme = ColorScheme.fromSeed(
-      seedColor: AppColors.primary,
-      brightness: Brightness.dark,
+    final ColorScheme scheme = dynamicColorScheme ??
+        ColorScheme.fromSeed(
+          seedColor: AppColors.primary,
+          brightness: Brightness.dark,
       primary: const Color(0xFF6CDAA8),
       onPrimary: const Color(0xFF003825),
       primaryContainer: const Color(0xFF005238),
