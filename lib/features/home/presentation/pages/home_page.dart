@@ -24,6 +24,13 @@ class _HomePageState extends State<HomePage> {
   final List<Product> _products = List<Product>.from(DummyData.sampleProducts);
 
   @override
+  void reassemble() {
+    super.reassemble();
+    _products.clear();
+    _products.addAll(DummyData.sampleProducts);
+  }
+
+  @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
