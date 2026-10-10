@@ -9,7 +9,7 @@ class Store {
   final String? imageUrl;
   final String note;
   final DateTime? createdAt;
-  final bool isPinned;
+  final bool? _isPinned;
 
   const Store({
     required this.id,
@@ -20,8 +20,10 @@ class Store {
     this.imageUrl,
     this.note = '',
     this.createdAt,
-    this.isPinned = false,
-  });
+    bool? isPinned,
+  }) : _isPinned = isPinned ?? false;
+
+  bool get isPinned => _isPinned ?? false;
 
   DateTime get date => createdAt ?? DateTime.now();
 
