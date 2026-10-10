@@ -33,8 +33,8 @@ class _HandCartAppState extends State<HandCartApp> {
           return MaterialApp(
             title: AppStrings.appName,
             debugShowCheckedModeBanner: false,
-            theme: AppTheme.lightTheme(lightDynamic),
-            darkTheme: AppTheme.darkTheme(darkDynamic),
+            theme: AppTheme.lightTheme(lightDynamic?.harmonized()),
+            darkTheme: AppTheme.darkTheme(darkDynamic?.harmonized()),
             themeMode: ThemeMode.system,
             home: const StoreListPage(),
           );
