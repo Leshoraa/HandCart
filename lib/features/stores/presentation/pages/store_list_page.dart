@@ -386,7 +386,7 @@ class _StoreListPageState extends State<StoreListPage> {
                     // Horizontal Category Filter Chips with Animated Morphing Capsule
                     SliverToBoxAdapter(
                       child: SizedBox(
-                        height: 40,
+                        height: 42,
                         child: ListView.separated(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.symmetric(
@@ -398,62 +398,54 @@ class _StoreListPageState extends State<StoreListPage> {
                           itemBuilder: (context, index) {
                             final category = categories[index];
                             final isSelected = category == _selectedCategory;
-                            return AnimatedContainer(
-                              duration: const Duration(milliseconds: 280),
-                              curve: Curves.easeInOutCubicEmphasized,
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? colorScheme.primaryContainer
-                                    : (isDark
-                                        ? colorScheme.surfaceContainerHigh
-                                        : Colors.white),
-                                borderRadius: BorderRadius.circular(
-                                  isSelected ? AppDimens.radiusFull : 10.0,
-                                ),
-                                border: Border.all(
+                            return Center(
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 250),
+                                curve: Curves.easeInOutCubicEmphasized,
+                                height: 32.0,
+                                decoration: BoxDecoration(
                                   color: isSelected
-                                      ? Colors.transparent
-                                      : colorScheme.outlineVariant
-                                          .withValues(alpha: 0.7),
-                                  width: 1.0,
-                                ),
-                                boxShadow: isSelected
-                                    ? [
-                                        BoxShadow(
-                                          color: colorScheme.primary
-                                              .withValues(alpha: 0.12),
-                                          blurRadius: 6,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ]
-                                    : null,
-                              ),
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
+                                      ? colorScheme.primaryContainer
+                                      : (isDark
+                                          ? colorScheme.surfaceContainerHigh
+                                          : Colors.white),
                                   borderRadius: BorderRadius.circular(
-                                    isSelected ? AppDimens.radiusFull : 10.0,
+                                    isSelected ? 16.0 : 10.0,
                                   ),
-                                  onTap: () => _onCategorySelected(category),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 14.0,
-                                      vertical: 8.0,
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? Colors.transparent
+                                        : colorScheme.outlineVariant
+                                            .withValues(alpha: 0.8),
+                                    width: 1.0,
+                                  ),
+                                ),
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(
+                                      isSelected ? 16.0 : 10.0,
                                     ),
-                                    child: Center(
-                                      child: AnimatedDefaultTextStyle(
-                                        duration:
-                                            const Duration(milliseconds: 200),
-                                        style: TextStyle(
-                                          fontSize: 13.0,
-                                          fontWeight: isSelected
-                                              ? FontWeight.w700
-                                              : FontWeight.w600,
-                                          color: isSelected
-                                              ? colorScheme.onPrimaryContainer
-                                              : colorScheme.onSurfaceVariant,
+                                    onTap: () => _onCategorySelected(category),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12.0,
+                                      ),
+                                      child: Center(
+                                        child: AnimatedDefaultTextStyle(
+                                          duration:
+                                              const Duration(milliseconds: 200),
+                                          style: TextStyle(
+                                            fontSize: 13.0,
+                                            fontWeight: isSelected
+                                                ? FontWeight.w700
+                                                : FontWeight.w600,
+                                            color: isSelected
+                                                ? colorScheme.onPrimaryContainer
+                                                : colorScheme.onSurfaceVariant,
+                                          ),
+                                          child: Text(category),
                                         ),
-                                        child: Text(category),
                                       ),
                                     ),
                                   ),
