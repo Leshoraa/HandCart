@@ -231,78 +231,271 @@ class _StoreListPageState extends State<StoreListPage> {
           ),
         ],
       ),
-      body: CustomScrollView(
-        slivers: [
-          // Search Bar (Matching Image 2)
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppDimens.md,
-                AppDimens.sm,
-                AppDimens.md,
-                AppDimens.md,
-              ),
-              child: SearchBar(
-                controller: _searchController,
-                hintText: AppStrings.searchStoresHint,
-                elevation: const WidgetStatePropertyAll(0),
-                backgroundColor:
-                    WidgetStatePropertyAll(colorScheme.surfaceContainerHigh),
-                shape: const WidgetStatePropertyAll(StadiumBorder()),
-                padding: const WidgetStatePropertyAll(
-                  EdgeInsets.symmetric(horizontal: 16.0),
+      body: Stack(
+        children: [
+          Column(
+            children: [
+              // Search Bar at Top (Matching Image 2)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppDimens.md,
+                  AppDimens.sm,
+                  AppDimens.md,
+                  AppDimens.md,
                 ),
-                leading: _searchQuery.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.arrow_back_rounded),
+                child: SearchBar(
+                  controller: _searchController,
+                  hintText: AppStrings.searchStoresHint,
+                  elevation: const WidgetStatePropertyAll(0),
+                  backgroundColor:
+                      WidgetStatePropertyAll(colorScheme.surfaceContainerHigh),
+                  shape: const WidgetStatePropertyAll(StadiumBorder()),
+                  padding: const WidgetStatePropertyAll(
+                    EdgeInsets.symmetric(horizontal: 16.0),
+                  ),
+                  leading: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.arrow_back_rounded),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() {
+                              _searchQuery = '';
+                            });
+                          },
+                        )
+                      : Icon(
+                          Icons.search_rounded,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                  trailing: [
+                    if (_searchQuery.isNotEmpty)
+                      IconButton(
+                        icon: const Icon(Icons.close_rounded),
                         onPressed: () {
                           _searchController.clear();
                           setState(() {
                             _searchQuery = '';
                           });
                         },
-                      )
-                    : Icon(
-                        Icons.search_rounded,
-                        color: colorScheme.onSurfaceVariant,
                       ),
-                trailing: [
-                  if (_searchQuery.isNotEmpty)
                     IconButton(
-                      icon: const Icon(Icons.close_rounded),
-                      onPressed: () {
-                        _searchController.clear();
-                        setState(() {
-                          _searchQuery = '';
-                        });
-                      },
+                      icon: const Icon(Icons.mic_rounded),
+                      onPressed: () {},
                     ),
-                  IconButton(
-                    icon: const Icon(Icons.mic_rounded),
-                    onPressed: () {},
-                  ),
-                ],
-                onChanged: _onSearchChanged,
+                  ],
+                  onChanged: _onSearchChanged,
+                ),
               ),
-            ),
+
+              // Scrollable Page Content (Chips, Section Header, Cards Grid)
+              Expanded(
+                child: CustomScrollView(
+                  slivers: [
+                    // Horizontal Category Filter Chips (Matching Image 2: 10dp squircle outline)
+                    SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: 42,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppDimens.md,
+                          ),
+                          itemCount: categories.length,
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(width: AppDimens.sm),
+                          itemBuilder: (context, index) {
+                            final category = categories[index];
+                            final isSelected = category == _selectedCategory;
+                            return FilterChip(
+                              label: Text(category),
+                              selected: isSelected,
+                              showCheckmark: false,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                              side: isSelected
+                                  ? BorderSide.none
+                                  : BorderSide(
+                                      color: colorScheme.outlineVariant
+                                          .withValues(alpha: 0.8),
+                                      width: 1,
+                                    ),
+                              backgroundColor: Colors.white,
+                              selectedColor: colorScheme.primaryContainer,
+                              labelStyle: TextStyle(
+                                color: isSelected
+                                    ? colorScheme.onPrimaryContainer
+                                    : colorScheme.onSurfaceVariant,
+                                fontWeight:
+                                    isSelected ? FontWeight.w700 : FontWeight.w600,
+                                fontSize: 13,
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
+                              onSelected: (selected) {
+                                if (selected) {
+                                  _onCategorySelected(category);
+                                }
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+
+                    // Section Header: "Today" & Stores Title (Matching Image 2)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          AppDimens.md,
+                          AppDimens.lg,
+                          AppDimens.md,
+                          AppDimens.sm + 4,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Today',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  AppStrings.storesTitle,
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -0.4,
+                                    color: colorScheme.onSurface,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 5,
+                              ),
+                              decoration: BoxDecoration(
+                                color: colorScheme.surfaceContainerHigh,
+                                borderRadius:
+                                    BorderRadius.circular(AppDimens.radiusFull),
+                              ),
+                              child: Text(
+                                '${filteredStores.length} stores',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // Store Cards 2-Column Grid (Matching Image 3)
+                    if (filteredStores.isEmpty)
+                      SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.storefront_outlined,
+                                size: 64,
+                                color: colorScheme.onSurfaceVariant
+                                    .withValues(alpha: 0.5),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'No matching shopping places found',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    else
+                      SliverPadding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppDimens.md,
+                        ),
+                        sliver: SliverGrid(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 12.0,
+                            mainAxisSpacing: 12.0,
+                            mainAxisExtent: 254.0,
+                          ),
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              final store = filteredStores[index];
+                              final itemCount =
+                                  planner.getStoreItemCount(store.id);
+                              final totalPrice =
+                                  planner.getStoreTotalPrice(store.id);
+                              return StoreCard(
+                                store: store,
+                                itemCount: itemCount,
+                                totalPrice: totalPrice,
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          StoreProductListPage(store: store),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                            childCount: filteredStores.length,
+                          ),
+                        ),
+                      ),
+
+                    const SliverToBoxAdapter(
+                      child: SizedBox(height: AppDimens.xl * 3),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
 
-          // Search Suggestions (Matching Image 1)
+          // Floating Search Suggestions Dropdown (Image 1) - Floats over content with elevation, does NOT shift layout!
           if (_searchQuery.isNotEmpty && filteredStores.isNotEmpty)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppDimens.md,
-                  0,
-                  AppDimens.md,
-                  AppDimens.md,
-                ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHigh,
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
+            Positioned(
+              top: 68.0,
+              left: AppDimens.md,
+              right: AppDimens.md,
+              child: Material(
+                elevation: 6,
+                shadowColor: Colors.black.withValues(alpha: 0.25),
+                borderRadius: BorderRadius.circular(20.0),
+                color: colorScheme.surfaceContainerHigh,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20.0),
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: filteredStores.take(3).map((store) {
                       return ListTile(
                         leading: Icon(
@@ -328,11 +521,14 @@ class _StoreListPageState extends State<StoreListPage> {
                           ),
                         ),
                         onTap: () {
+                          _searchController.clear();
+                          setState(() {
+                            _searchQuery = '';
+                          });
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) =>
-                                  StoreProductListPage(store: store),
+                              builder: (_) => StoreProductListPage(store: store),
                             ),
                           );
                         },
@@ -342,183 +538,6 @@ class _StoreListPageState extends State<StoreListPage> {
                 ),
               ),
             ),
-
-          // Horizontal Category Filter Chips (Matching Image 2: 10dp squircle outline)
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: 42,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: AppDimens.md),
-                itemCount: categories.length,
-                separatorBuilder: (context, index) =>
-                    const SizedBox(width: AppDimens.sm),
-                itemBuilder: (context, index) {
-                  final category = categories[index];
-                  final isSelected = category == _selectedCategory;
-                  return FilterChip(
-                    label: Text(category),
-                    selected: isSelected,
-                    showCheckmark: false,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    side: isSelected
-                        ? BorderSide.none
-                        : BorderSide(
-                            color: colorScheme.outlineVariant
-                                .withValues(alpha: 0.8),
-                            width: 1,
-                          ),
-                    backgroundColor: Colors.white,
-                    selectedColor: colorScheme.primaryContainer,
-                    labelStyle: TextStyle(
-                      color: isSelected
-                          ? colorScheme.onPrimaryContainer
-                          : colorScheme.onSurfaceVariant,
-                      fontWeight:
-                          isSelected ? FontWeight.w700 : FontWeight.w600,
-                      fontSize: 13,
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
-                    onSelected: (selected) {
-                      if (selected) {
-                        _onCategorySelected(category);
-                      }
-                    },
-                  );
-                },
-              ),
-            ),
-          ),
-
-          // Section Header: "Today" & Stores Title (Matching Image 2)
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppDimens.md,
-                AppDimens.lg,
-                AppDimens.md,
-                AppDimens.sm + 4,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Today',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        AppStrings.storesTitle,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.4,
-                          color: colorScheme.onSurface,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: colorScheme.surfaceContainerHigh,
-                      borderRadius:
-                          BorderRadius.circular(AppDimens.radiusFull),
-                    ),
-                    child: Text(
-                      '${filteredStores.length} stores',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Store Cards 2-Column Grid (Matching Image 3)
-          if (filteredStores.isEmpty)
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.storefront_outlined,
-                      size: 64,
-                      color: colorScheme.onSurfaceVariant
-                          .withValues(alpha: 0.5),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'No matching shopping places found',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )
-          else
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: AppDimens.md),
-              sliver: SliverGrid(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12.0,
-                  mainAxisSpacing: 12.0,
-                  mainAxisExtent: 254.0,
-                ),
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final store = filteredStores[index];
-                    final itemCount = planner.getStoreItemCount(store.id);
-                    final totalPrice = planner.getStoreTotalPrice(store.id);
-                    return StoreCard(
-                      store: store,
-                      itemCount: itemCount,
-                      totalPrice: totalPrice,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => StoreProductListPage(store: store),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                  childCount: filteredStores.length,
-                ),
-              ),
-            ),
-
-          const SliverToBoxAdapter(
-            child: SizedBox(height: AppDimens.xl * 3),
-          ),
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
