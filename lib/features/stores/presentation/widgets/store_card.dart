@@ -8,6 +8,9 @@ class StoreCard extends StatelessWidget {
   final int itemCount;
   final double totalPrice;
   final VoidCallback onTap;
+  final VoidCallback? onPin;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
   const StoreCard({
     super.key,
@@ -15,6 +18,9 @@ class StoreCard extends StatelessWidget {
     required this.itemCount,
     required this.totalPrice,
     required this.onTap,
+    this.onPin,
+    this.onEdit,
+    this.onDelete,
   });
 
   @override
@@ -115,6 +121,150 @@ class StoreCard extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                           color: isDark ? Colors.white : const Color(0xFF191C1E),
                           letterSpacing: 0.1,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Visual Pin Indicator (when pinned)
+                  if (store.isPinned)
+                    Positioned(
+                      top: 8.0,
+                      right: 40.0,
+                      child: Container(
+                        width: 28.0,
+                        height: 28.0,
+                        decoration: BoxDecoration(
+                          color: colorScheme.primaryContainer,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.1),
+                              blurRadius: 4,
+                              offset: const Offset(0, 1),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.push_pin_rounded,
+                            size: 14.0,
+                            color: colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  // 3-Dots Action Menu Button
+                  Positioned(
+                    top: 8.0,
+                    right: 8.0,
+                    child: Container(
+                      width: 28.0,
+                      height: 28.0,
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? Colors.black.withValues(alpha: 0.75)
+                            : Colors.white.withValues(alpha: 0.94),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.08),
+                            blurRadius: 4,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: PopupMenuButton<String>(
+                          padding: EdgeInsets.zero,
+                          iconSize: 16.0,
+                          tooltip: 'Store options',
+                          icon: Icon(
+                            Icons.more_vert_rounded,
+                            size: 16.0,
+                            color: isDark ? Colors.white : const Color(0xFF191C1E),
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16.0),
+                          ),
+                          elevation: 4,
+                          onSelected: (value) {
+                            switch (value) {
+                              case 'pin':
+                                onPin?.call();
+                                break;
+                              case 'edit':
+                                onEdit?.call();
+                                break;
+                              case 'delete':
+                                onDelete?.call();
+                                break;
+                            }
+                          },
+                          itemBuilder: (context) => [
+                            PopupMenuItem<String>(
+                              value: 'pin',
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    store.isPinned
+                                        ? Icons.push_pin_outlined
+                                        : Icons.push_pin_rounded,
+                                    size: 18.0,
+                                    color: store.isPinned
+                                        ? colorScheme.primary
+                                        : colorScheme.onSurface,
+                                  ),
+                                  const SizedBox(width: 10.0),
+                                  Text(
+                                    store.isPinned ? 'Unpin Store' : 'Pin Store',
+                                    style: const TextStyle(
+                                      fontSize: 13.0,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const PopupMenuItem<String>(
+                              value: 'edit',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.edit_outlined, size: 18.0),
+                                  SizedBox(width: 10.0),
+                                  Text(
+                                    'Rename / Edit',
+                                    style: TextStyle(
+                                      fontSize: 13.0,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            PopupMenuItem<String>(
+                              value: 'delete',
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.delete_outline_rounded,
+                                    size: 18.0,
+                                    color: colorScheme.error,
+                                  ),
+                                  const SizedBox(width: 10.0),
+                                  Text(
+                                    'Delete Store',
+                                    style: TextStyle(
+                                      fontSize: 13.0,
+                                      fontWeight: FontWeight.w600,
+                                      color: colorScheme.error,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),

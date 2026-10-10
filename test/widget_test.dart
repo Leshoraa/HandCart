@@ -14,9 +14,9 @@ void main() {
     await tester.pumpWidget(const HandCartApp());
     await tester.pumpAndSettle();
 
-    // Verify App title and Store section title
+    // Verify App title and Date section header 'Yesterday'
     expect(find.text(AppStrings.appName), findsOneWidget);
-    expect(find.text(AppStrings.storesTitle), findsOneWidget);
+    expect(find.text('Yesterday'), findsOneWidget);
 
     // Verify Search bar for stores is present
     expect(find.byType(SearchBar), findsOneWidget);

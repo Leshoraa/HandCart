@@ -5,44 +5,51 @@ import '../../shopping_list/data/models/product_model.dart';
 class StoreDummyData {
   StoreDummyData._();
 
-  static const List<Store> initialStores = [
-    Store(
-      id: 'store_1',
-      name: 'Grand Fresh Market',
-      category: 'Supermarket',
-      description: 'Daily fresh produce, organic dairy & pantry essentials',
-      icon: Icons.local_grocery_store_rounded,
-      imageUrl: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=500&auto=format&fit=crop&q=80',
-      note: 'Check milk expiration date; buy organic apples if available; use loyalty member card at checkout.',
-    ),
-    Store(
-      id: 'store_2',
-      name: 'Artisan Bakery & Cafe',
-      category: 'Bakery',
-      description: 'Handcrafted sourdough, golden croissants & specialty brews',
-      icon: Icons.bakery_dining_rounded,
-      imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&auto=format&fit=crop&q=80',
-      note: 'Ask for sourdough loaf pre-sliced; pick up before 11:00 AM while warm.',
-    ),
-    Store(
-      id: 'store_3',
-      name: 'Green Leaf Organic Mart',
-      category: 'Organic Store',
-      description: 'Clean pantry essentials, superfoods & healthy snacks',
-      icon: Icons.eco_rounded,
-      imageUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&auto=format&fit=crop&q=80',
-      note: 'Bring reusable canvas bags for environmental discount; check cold-pressed coconut oil.',
-    ),
-    Store(
-      id: 'store_4',
-      name: 'Daily Corner Mart',
-      category: 'Convenience',
-      description: 'Quick refreshments, late-night snacks & household goods',
-      icon: Icons.storefront_rounded,
-      imageUrl: 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=500&auto=format&fit=crop&q=80',
-      note: 'Grab sparkling water pack and rechargeable batteries.',
-    ),
-  ];
+  static List<Store> get initialStores {
+    final yesterday = DateTime.now().subtract(const Duration(days: 1));
+    return [
+      Store(
+        id: 'store_1',
+        name: 'Grand Fresh Market',
+        category: 'Supermarket',
+        description: 'Daily fresh produce, organic dairy & pantry essentials',
+        icon: Icons.local_grocery_store_rounded,
+        imageUrl: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=500&auto=format&fit=crop&q=80',
+        note: 'Check milk expiration date; buy organic apples if available; use loyalty member card at checkout.',
+        createdAt: yesterday,
+      ),
+      Store(
+        id: 'store_2',
+        name: 'Artisan Bakery & Cafe',
+        category: 'Bakery',
+        description: 'Handcrafted sourdough, golden croissants & specialty brews',
+        icon: Icons.bakery_dining_rounded,
+        imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&auto=format&fit=crop&q=80',
+        note: 'Ask for sourdough loaf pre-sliced; pick up before 11:00 AM while warm.',
+        createdAt: yesterday,
+      ),
+      Store(
+        id: 'store_3',
+        name: 'Green Leaf Organic Mart',
+        category: 'Organic Store',
+        description: 'Clean pantry essentials, superfoods & healthy snacks',
+        icon: Icons.eco_rounded,
+        imageUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&auto=format&fit=crop&q=80',
+        note: 'Bring reusable canvas bags for environmental discount; check cold-pressed coconut oil.',
+        createdAt: yesterday,
+      ),
+      Store(
+        id: 'store_4',
+        name: 'Daily Corner Mart',
+        category: 'Convenience',
+        description: 'Quick refreshments, late-night snacks & household goods',
+        icon: Icons.storefront_rounded,
+        imageUrl: 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=500&auto=format&fit=crop&q=80',
+        note: 'Grab sparkling water pack and rechargeable batteries.',
+        createdAt: yesterday,
+      ),
+    ];
+  }
 
   static const List<Product> initialProducts = [
     // Store 1: Grand Fresh Market

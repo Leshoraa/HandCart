@@ -8,6 +8,8 @@ class Store {
   final IconData icon;
   final String? imageUrl;
   final String note;
+  final DateTime? createdAt;
+  final bool isPinned;
 
   const Store({
     required this.id,
@@ -17,7 +19,11 @@ class Store {
     required this.icon,
     this.imageUrl,
     this.note = '',
+    this.createdAt,
+    this.isPinned = false,
   });
+
+  DateTime get date => createdAt ?? DateTime.now();
 
   Store copyWith({
     String? id,
@@ -27,6 +33,8 @@ class Store {
     IconData? icon,
     String? imageUrl,
     String? note,
+    DateTime? createdAt,
+    bool? isPinned,
   }) {
     return Store(
       id: id ?? this.id,
@@ -36,6 +44,8 @@ class Store {
       icon: icon ?? this.icon,
       imageUrl: imageUrl ?? this.imageUrl,
       note: note ?? this.note,
+      createdAt: createdAt ?? this.createdAt,
+      isPinned: isPinned ?? this.isPinned,
     );
   }
 }

@@ -109,5 +109,50 @@ void main() {
       expect(controller.getStoreItemCount(store1.id), equals(0));
       expect(controller.getStoreItemCount(store2.id), equals(1));
     });
+
+    test('updateStore modifies store information and notes', () {
+      final store = controller.stores.first;
+      final updated = store.copyWith(
+        name: 'Grand Fresh Supermarket Renamed',
+        category: 'Megamart',
+        description: 'Updated store description',
+        note: 'New memo note',
+      );
+
+      controller.updateStore(updated);
+      final found = controller.stores.firstWhere((s) => s.id == store.id);
+      expect(found.name, equals('Grand Fresh Supermarket Renamed'));
+      expect(found.category, equals('Megamart'));
+      expect(found.description, equals('Updated store description'));
+      expect(controller.getStoreNote(store.id), equals('New memo note'));
+    });
+
+    test('togglePinStore toggles isPinned boolean flag', () {
+      final store = controller.stores.first;
+      expect(store.isPinned, isFalse);
+
+      controller.togglePinStore(store.id);
+      expect(controller.stores.firstWhere((s) => s.id == store.id).isPinned, isTrue);
+
+      controller.togglePinStore(store.id);
+      expect(controller.stores.firstWhere((s) => s.id == store.id).isPinned, isFalse);
+    });
+
+    test('deleteStore removes store, its notes, and its products', () {
+      final store = controller.stores.first;
+      final initialStoreCount = controller.stores.length;
+      final product = controller.getProductsForStore(store.id).first;
+
+      controller.incrementQuantity(product);
+      expect(controller.getProductQuantity(product.id), equals(1));
+
+      controller.deleteStore(store.id);
+
+      expect(controller.stores.length, equals(initialStoreCount - 1));
+      expect(controller.stores.any((s) => s.id == store.id), isFalse);
+      expect(controller.getStoreNote(store.id), isEmpty);
+      expect(controller.getProductsForStore(store.id), isEmpty);
+      expect(controller.getProductQuantity(product.id), equals(0));
+    });
   });
 }

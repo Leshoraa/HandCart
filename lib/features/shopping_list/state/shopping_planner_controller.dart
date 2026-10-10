@@ -107,6 +107,35 @@ class ShoppingPlannerController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateStore(Store updatedStore) {
+    final index = _stores.indexWhere((s) => s.id == updatedStore.id);
+    if (index != -1) {
+      _stores[index] = updatedStore;
+      _storeNotes[updatedStore.id] = updatedStore.note;
+      notifyListeners();
+    }
+  }
+
+  void togglePinStore(String storeId) {
+    final index = _stores.indexWhere((s) => s.id == storeId);
+    if (index != -1) {
+      final current = _stores[index];
+      _stores[index] = current.copyWith(isPinned: !current.isPinned);
+      notifyListeners();
+    }
+  }
+
+  void deleteStore(String storeId) {
+    _stores.removeWhere((s) => s.id == storeId);
+    _storeNotes.remove(storeId);
+    final storeProducts = getProductsForStore(storeId);
+    for (final p in storeProducts) {
+      _quantities.remove(p.id);
+    }
+    _products.removeWhere((p) => p.storeId == storeId);
+    notifyListeners();
+  }
+
   void addProduct(Product product) {
     _products.insert(0, product);
     notifyListeners();
