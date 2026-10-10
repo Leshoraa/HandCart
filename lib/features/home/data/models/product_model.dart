@@ -8,6 +8,7 @@ class Product {
   final String description;
   final IconData icon;
   final double rating;
+  final String? imageUrl;
 
   const Product({
     required this.id,
@@ -17,6 +18,7 @@ class Product {
     required this.description,
     required this.icon,
     this.rating = 4.8,
+    this.imageUrl,
   });
 
   Product copyWith({
@@ -27,6 +29,7 @@ class Product {
     String? description,
     IconData? icon,
     double? rating,
+    String? imageUrl,
   }) {
     return Product(
       id: id ?? this.id,
@@ -36,6 +39,7 @@ class Product {
       description: description ?? this.description,
       icon: icon ?? this.icon,
       rating: rating ?? this.rating,
+      imageUrl: imageUrl ?? this.imageUrl,
     );
   }
 }

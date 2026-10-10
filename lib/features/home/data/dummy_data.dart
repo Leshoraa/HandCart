@@ -22,6 +22,7 @@ class DummyData {
       description: 'Robusta espresso with fresh milk and organic palm sugar syrup.',
       icon: Icons.local_cafe_rounded,
       rating: 4.9,
+      imageUrl: 'https://images.unsplash.com/photo-1517256064527-09c73fc73e38?w=500&auto=format&fit=crop&q=80',
     ),
     Product(
       id: 'p2',
@@ -31,6 +32,7 @@ class DummyData {
       description: 'Freshly baked artisan whole wheat sourdough bread, rich in fiber.',
       icon: Icons.bakery_dining_rounded,
       rating: 4.8,
+      imageUrl: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=500&auto=format&fit=crop&q=80',
     ),
     Product(
       id: 'p3',
@@ -40,6 +42,7 @@ class DummyData {
       description: 'Authentic Japanese Uji matcha blended with creamy oat milk.',
       icon: Icons.emoji_food_beverage_rounded,
       rating: 4.7,
+      imageUrl: 'https://images.unsplash.com/photo-1536256263959-770b48d82b0a?w=500&auto=format&fit=crop&q=80',
     ),
     Product(
       id: 'p4',
@@ -49,6 +52,7 @@ class DummyData {
       description: 'Traditional savory tempeh crisps seasoned with aromatic coriander.',
       icon: Icons.fastfood_rounded,
       rating: 4.6,
+      imageUrl: 'https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=500&auto=format&fit=crop&q=80',
     ),
     Product(
       id: 'p5',
@@ -58,6 +62,7 @@ class DummyData {
       description: 'Cold-pressed pure organic coconut oil without chemical preservatives.',
       icon: Icons.soup_kitchen_rounded,
       rating: 4.9,
+      imageUrl: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=500&auto=format&fit=crop&q=80',
     ),
     Product(
       id: 'p6',
@@ -67,6 +72,7 @@ class DummyData {
       description: 'Heavy-duty reusable canvas tote bag for daily shopping.',
       icon: Icons.shopping_bag_rounded,
       rating: 4.8,
+      imageUrl: 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=500&auto=format&fit=crop&q=80',
     ),
   ];
 }

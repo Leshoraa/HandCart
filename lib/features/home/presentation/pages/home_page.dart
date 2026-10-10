@@ -33,7 +33,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void reassemble() {
     super.reassemble();
-    // Synchronize catalog data on debug hot reload
     _products.clear();
     _products.addAll(DummyData.sampleProducts);
   }
@@ -212,45 +211,58 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          // Date & Count Section Header
+          // Section Header: Retail Headline, Relative Date Subtitle & Count Badge
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(
                 AppDimens.md,
                 AppDimens.lg,
                 AppDimens.md,
-                AppDimens.sm,
+                AppDimens.sm + 4,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   InkWell(
                     borderRadius: BorderRadius.circular(12),
                     onTap: _pickDate,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4.0),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
+                      padding: const EdgeInsets.symmetric(vertical: 2.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             _selectedCategory == AppStrings.allCategories
-                                ? DateFormatter.formatRelativeDate(_selectedDate)
+                                ? AppStrings.featuredProducts
                                 : _selectedCategory,
                             style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.4,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -0.5,
                               color: colorScheme.onSurface,
                             ),
                           ),
-                          if (_selectedCategory == AppStrings.allCategories) ...[
-                            const SizedBox(width: 6),
-                            Icon(
-                              Icons.calendar_today_rounded,
-                              size: 15,
-                              color: colorScheme.primary,
-                            ),
-                          ],
+                          const SizedBox(height: 2),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.calendar_today_rounded,
+                                size: 13,
+                                color: colorScheme.primary,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                DateFormatter.formatRelativeDate(_selectedDate),
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                     ),
@@ -258,7 +270,7 @@ class _HomePageState extends State<HomePage> {
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
-                      vertical: 4,
+                      vertical: 5,
                     ),
                     decoration: BoxDecoration(
                       color: colorScheme.surfaceContainerHigh,
@@ -279,7 +291,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          // Products Grid
+          // Products Grid (Balanced 0.72 Aspect Ratio)
           if (_filteredProducts.isEmpty)
             SliverFillRemaining(
               hasScrollBody: false,
@@ -311,9 +323,9 @@ class _HomePageState extends State<HomePage> {
               sliver: SliverGrid(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  childAspectRatio: 0.64,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
+                  childAspectRatio: 0.72,
+                  crossAxisSpacing: 14,
+                  mainAxisSpacing: 14,
                 ),
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
@@ -338,7 +350,7 @@ class _HomePageState extends State<HomePage> {
         ),
         elevation: 3,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18.0),
+          borderRadius: BorderRadius.circular(16.0),
         ),
         backgroundColor: colorScheme.primaryContainer,
         foregroundColor: colorScheme.onPrimaryContainer,

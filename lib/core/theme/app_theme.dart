@@ -38,7 +38,7 @@ class AppTheme {
       cardTheme: CardThemeData(
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24.0),
+          borderRadius: BorderRadius.circular(22.0),
         ),
         color: scheme.surfaceContainerLowest,
         clipBehavior: Clip.antiAlias,
@@ -79,23 +79,25 @@ class AppTheme {
           vertical: AppDimens.sm,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(24.0),
+          borderRadius: BorderRadius.circular(20.0),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(24.0),
+          borderRadius: BorderRadius.circular(20.0),
           borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(24.0),
+          borderRadius: BorderRadius.circular(20.0),
           borderSide: BorderSide(color: scheme.primary, width: 2),
         ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         elevation: 2,
-        backgroundColor: scheme.primary,
-        foregroundColor: scheme.onPrimary,
-        shape: const StadiumBorder(),
+        backgroundColor: scheme.primaryContainer,
+        foregroundColor: scheme.onPrimaryContainer,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.0),
+        ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -146,7 +148,7 @@ class AppTheme {
       cardTheme: CardThemeData(
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24.0),
+          borderRadius: BorderRadius.circular(22.0),
         ),
         color: scheme.surfaceContainerLow,
         clipBehavior: Clip.antiAlias,
@@ -187,15 +189,15 @@ class AppTheme {
           vertical: AppDimens.sm,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(24.0),
+          borderRadius: BorderRadius.circular(20.0),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(24.0),
+          borderRadius: BorderRadius.circular(20.0),
           borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(24.0),
+          borderRadius: BorderRadius.circular(20.0),
           borderSide: BorderSide(color: scheme.primaryContainer, width: 2),
         ),
       ),
@@ -203,7 +205,9 @@ class AppTheme {
         elevation: 2,
         backgroundColor: scheme.primaryContainer,
         foregroundColor: scheme.onPrimaryContainer,
-        shape: const StadiumBorder(),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.0),
+        ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
