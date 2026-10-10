@@ -46,10 +46,10 @@ class CartItemTile extends StatelessWidget {
           boxShadow: [
             BoxShadow(
               color: colorScheme.brightness == Brightness.light
-                  ? Colors.black.withValues(alpha: 0.07)
-                  : Colors.black.withValues(alpha: 0.35),
-              blurRadius: 14,
-              offset: const Offset(0, 4),
+                  ? Colors.black.withValues(alpha: 0.035)
+                  : Colors.black.withValues(alpha: 0.2),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
             ),
           ],
         ),

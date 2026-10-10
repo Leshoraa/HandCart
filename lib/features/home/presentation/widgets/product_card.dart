@@ -34,18 +34,10 @@ class _ProductCardState extends State<ProductCard> {
         boxShadow: [
           BoxShadow(
             color: colorScheme.brightness == Brightness.light
-                ? Colors.black.withValues(alpha: 0.09)
-                : Colors.black.withValues(alpha: 0.45),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-            spreadRadius: -2,
-          ),
-          BoxShadow(
-            color: colorScheme.brightness == Brightness.light
-                ? Colors.black.withValues(alpha: 0.04)
+                ? Colors.black.withValues(alpha: 0.035)
                 : Colors.black.withValues(alpha: 0.2),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
             spreadRadius: 0,
           ),
         ],
@@ -214,7 +206,7 @@ class _ProductCardState extends State<ProductCard> {
                   cart.addItem(widget.product);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('${widget.product.name} dimasukkan ke keranjang'),
+                      content: Text('${widget.product.name} added to cart'),
                       duration: const Duration(seconds: 1),
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(
@@ -235,7 +227,7 @@ class _ProductCardState extends State<ProductCard> {
                     Icon(Icons.add_rounded, size: 18),
                     SizedBox(width: 4),
                     Text(
-                      'Beli',
+                      'Add',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w800,

@@ -216,11 +216,11 @@ class CartPage extends StatelessWidget {
           size: 48,
         ),
         title: const Text(
-          'Pesanan Berhasil!',
+          'Order Successful!',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         content: const Text(
-          'Terima kasih telah berbelanja menggunakan HandCart. Pesanan Anda segera diproses.',
+          'Thank you for shopping with HandCart. Your order will be processed shortly.',
           textAlign: TextAlign.center,
         ),
         actionsAlignment: MainAxisAlignment.center,
@@ -235,7 +235,7 @@ class CartPage extends StatelessWidget {
               shape: const StadiumBorder(),
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
             ),
-            child: const Text('Selesai'),
+            child: const Text('Done'),
           ),
         ],
       ),

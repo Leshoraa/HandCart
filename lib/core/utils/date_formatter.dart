@@ -2,13 +2,13 @@ class DateFormatter {
   DateFormatter._();
 
   static const List<String> _days = [
-    'Senin',
-    'Selasa',
-    'Rabu',
-    'Kamis',
-    'Jumat',
-    'Sabtu',
-    'Minggu',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
   ];
 
   static const List<String> _months = [
@@ -16,20 +16,20 @@ class DateFormatter {
     'Feb',
     'Mar',
     'Apr',
-    'Mei',
+    'May',
     'Jun',
     'Jul',
-    'Agu',
+    'Aug',
     'Sep',
-    'Okt',
+    'Oct',
     'Nov',
-    'Des',
+    'Dec',
   ];
 
-  /// Mengubah [DateTime] menjadi teks tanggal relatif dalam Bahasa Indonesia:
-  /// - Hari ini -> "Hari Ini"
-  /// - Kemarin -> "Kemarin"
-  /// - Tanggal lainnya -> misal "Selasa, 19 Jan 2026"
+  /// Formats a [DateTime] into relative English date text:
+  /// - Today -> "Today"
+  /// - Yesterday -> "Yesterday"
+  /// - Older dates -> e.g. "Tuesday, Jan 19, 2026"
   static String formatRelativeDate(DateTime date) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -37,13 +37,13 @@ class DateFormatter {
     final difference = today.difference(target).inDays;
 
     if (difference == 0) {
-      return 'Hari Ini';
+      return 'Today';
     } else if (difference == 1) {
-      return 'Kemarin';
+      return 'Yesterday';
     } else {
       final dayName = _days[date.weekday - 1];
       final monthName = _months[date.month - 1];
-      return '$dayName, ${date.day} $monthName ${date.year}';
+      return '$dayName, $monthName ${date.day}, ${date.year}';
     }
   }
 }

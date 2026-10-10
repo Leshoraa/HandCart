@@ -17,7 +17,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String _selectedCategory = 'Semua';
+  String _selectedCategory = 'All';
   String _searchQuery = '';
   DateTime _selectedDate = DateTime.now();
   final TextEditingController _searchController = TextEditingController();
@@ -31,7 +31,7 @@ class _HomePageState extends State<HomePage> {
 
   List<Product> get _filteredProducts {
     return _products.where((product) {
-      final matchesCategory = _selectedCategory == 'Semua' ||
+      final matchesCategory = _selectedCategory == 'All' ||
           product.category == _selectedCategory;
       final matchesSearch = _searchQuery.isEmpty ||
           product.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
@@ -188,7 +188,7 @@ class _HomePageState extends State<HomePage> {
                         initialDate: _selectedDate,
                         firstDate: DateTime(2020),
                         lastDate: DateTime(2030),
-                        helpText: 'PILIH TANGGAL',
+                        helpText: 'SELECT DATE',
                       );
                       if (picked != null) {
                         setState(() {
@@ -202,7 +202,7 @@ class _HomePageState extends State<HomePage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            _selectedCategory == 'Semua'
+                            _selectedCategory == 'All'
                                 ? DateFormatter.formatRelativeDate(_selectedDate)
                                 : _selectedCategory,
                             style: TextStyle(
@@ -212,7 +212,7 @@ class _HomePageState extends State<HomePage> {
                               color: colorScheme.onSurface,
                             ),
                           ),
-                          if (_selectedCategory == 'Semua') ...[
+                          if (_selectedCategory == 'All') ...[
                             const SizedBox(width: 6),
                             Icon(
                               Icons.calendar_today_rounded,
@@ -235,7 +235,7 @@ class _HomePageState extends State<HomePage> {
                           BorderRadius.circular(AppDimens.radiusFull),
                     ),
                     child: Text(
-                      '${_filteredProducts.length} produk',
+                      '${_filteredProducts.length} products',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
@@ -263,7 +263,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     const SizedBox(height: AppDimens.md),
                     Text(
-                      'Tidak ada produk yang cocok',
+                      'No matching products found',
                       style: TextStyle(
                         fontSize: 16,
                         color: colorScheme.onSurfaceVariant,
@@ -344,7 +344,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                           const SizedBox(width: 10),
                           Text(
-                            'Keranjang (${cart.totalCount})',
+                            'Cart (${cart.totalCount})',
                             style: TextStyle(
                               color: colorScheme.onPrimary,
                               fontWeight: FontWeight.w800,
@@ -375,7 +375,7 @@ class _HomePageState extends State<HomePage> {
     final colorScheme = Theme.of(context).colorScheme;
     final nameController = TextEditingController();
     final priceController = TextEditingController();
-    String selectedCategory = DummyData.categories[1]; // 'Minuman'
+    String selectedCategory = DummyData.categories[1]; // 'Beverages'
     IconData selectedIcon = Icons.local_cafe_rounded;
 
     showModalBottomSheet(
@@ -412,7 +412,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Tambah Produk Baru',
+                      'Add New Product',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
@@ -423,22 +423,22 @@ class _HomePageState extends State<HomePage> {
                     TextField(
                       controller: nameController,
                       decoration: const InputDecoration(
-                        labelText: 'Nama Produk',
+                        labelText: 'Product Name',
                         prefixIcon: Icon(Icons.label_outline_rounded),
                       ),
                     ),
                     const SizedBox(height: 12),
                     TextField(
                       controller: priceController,
-                      keyboardType: TextInputType.number,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       decoration: const InputDecoration(
-                        labelText: 'Harga (Rp)',
-                        prefixIcon: Icon(Icons.payments_outlined),
+                        labelText: 'Price',
+                        prefixIcon: Icon(Icons.attach_money_rounded),
                       ),
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Kategori',
+                      'Category',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
@@ -450,7 +450,7 @@ class _HomePageState extends State<HomePage> {
                       spacing: 8,
                       runSpacing: 8,
                       children: DummyData.categories
-                          .where((c) => c != 'Semua')
+                          .where((c) => c != 'All')
                           .map((category) {
                         final isSel = category == selectedCategory;
                         return ChoiceChip(
@@ -471,13 +471,13 @@ class _HomePageState extends State<HomePage> {
                             if (selected) {
                               setModalState(() {
                                 selectedCategory = category;
-                                if (category == 'Minuman') {
+                                if (category == 'Beverages') {
                                   selectedIcon = Icons.local_cafe_rounded;
-                                } else if (category == 'Makanan') {
+                                } else if (category == 'Food') {
                                   selectedIcon = Icons.bakery_dining_rounded;
-                                } else if (category == 'Snack') {
+                                } else if (category == 'Snacks') {
                                   selectedIcon = Icons.fastfood_rounded;
-                                } else if (category == 'Kebutuhan Dapur') {
+                                } else if (category == 'Pantry') {
                                   selectedIcon = Icons.soup_kitchen_rounded;
                                 } else {
                                   selectedIcon = Icons.shopping_bag_rounded;
@@ -500,7 +500,7 @@ class _HomePageState extends State<HomePage> {
                           if (name.isEmpty || price <= 0) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text('Harap masukkan nama dan harga yang valid'),
+                                content: Text('Please enter a valid product name and price'),
                                 behavior: SnackBarBehavior.floating,
                               ),
                             );
@@ -512,7 +512,7 @@ class _HomePageState extends State<HomePage> {
                             name: name,
                             category: selectedCategory,
                             price: price,
-                            description: 'Produk $selectedCategory baru ditambahkan.',
+                            description: 'Newly added $selectedCategory product.',
                             icon: selectedIcon,
                             rating: 5.0,
                           );
@@ -524,7 +524,7 @@ class _HomePageState extends State<HomePage> {
                           Navigator.pop(ctx);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Produk "$name" berhasil ditambahkan!'),
+                              content: Text('Product "$name" added successfully!'),
                               behavior: SnackBarBehavior.floating,
                             ),
                           );
@@ -533,7 +533,7 @@ class _HomePageState extends State<HomePage> {
                           shape: const StadiumBorder(),
                         ),
                         child: const Text(
-                          'Simpan Produk',
+                          'Save Product',
                           style: TextStyle(
                             fontWeight: FontWeight.w800,
                             fontSize: 15,
