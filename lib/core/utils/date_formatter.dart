@@ -45,6 +45,6 @@ class DateFormatter {
 
     final dayName = _days[date.weekday - 1];
     final monthName = _months[date.month - 1];
-    return '$dayName, $monthName ${date.day}, ${date.year}';
+    return '$dayName, ${date.day} $monthName ${date.year}';
   }
 }

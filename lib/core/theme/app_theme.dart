@@ -8,19 +8,19 @@ class AppTheme {
   static ThemeData lightTheme([ColorScheme? dynamicColorScheme]) {
     final ColorScheme scheme = dynamicColorScheme ??
         ColorScheme.fromSeed(
-          seedColor: AppColors.primary,
+          seedColor: AppColors.primaryLight,
           brightness: Brightness.light,
-          primary: AppColors.primary,
-          onPrimary: AppColors.onPrimary,
-          primaryContainer: AppColors.primaryContainer,
-          onPrimaryContainer: AppColors.onPrimaryContainer,
+          primary: AppColors.primaryLight,
+          onPrimary: AppColors.onPrimaryLight,
+          primaryContainer: AppColors.primaryContainerLight,
+          onPrimaryContainer: AppColors.onPrimaryContainerLight,
           secondary: AppColors.secondary,
           surface: AppColors.surfaceLight,
-          surfaceContainer: const Color(0xFFF0F4EF),
-          surfaceContainerHigh: const Color(0xFFE8ECE7),
-          surfaceContainerHighest: const Color(0xFFDFE4DE),
-          surfaceContainerLow: const Color(0xFFF7F9F6),
-          surfaceContainerLowest: Colors.white,
+          surfaceContainer: AppColors.surfaceContainerLight,
+          surfaceContainerHigh: AppColors.surfaceContainerHighLight,
+          surfaceContainerHighest: AppColors.surfaceContainerHighestLight,
+          surfaceContainerLow: AppColors.surfaceContainerLowLight,
+          surfaceContainerLowest: AppColors.surfaceContainerLowestLight,
           onSurface: AppColors.textPrimaryLight,
           onSurfaceVariant: AppColors.textSecondaryLight,
           outline: const Color(0xFFC2C8C2),
@@ -33,152 +33,54 @@ class AppTheme {
       colorScheme: scheme,
       scaffoldBackgroundColor: scheme.surface,
       appBarTheme: AppBarTheme(
-        centerTitle: true,
-        elevation: 0,
-        backgroundColor: scheme.surface,
-        scrolledUnderElevation: 0,
-        titleTextStyle: TextStyle(
-          color: scheme.onSurface,
-          fontSize: 18,
-          fontWeight: FontWeight.w700,
-          letterSpacing: -0.2,
-        ),
-      ),
-      cardTheme: CardThemeData(
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24.0),
-        ),
-        color: scheme.surfaceContainerLowest,
-        clipBehavior: Clip.antiAlias,
-      ),
-      searchBarTheme: SearchBarThemeData(
-        elevation: const WidgetStatePropertyAll(0),
-        backgroundColor: WidgetStatePropertyAll(scheme.surfaceContainer),
-        shape: const WidgetStatePropertyAll(StadiumBorder()),
-        padding: const WidgetStatePropertyAll(
-          EdgeInsets.symmetric(horizontal: 16.0),
-        ),
-        hintStyle: WidgetStatePropertyAll(
-          TextStyle(color: scheme.onSurfaceVariant, fontSize: 14),
-        ),
-      ),
-      chipTheme: ChipThemeData(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        side: BorderSide(
-          color: scheme.outlineVariant.withValues(alpha: 0.8),
-          width: 1,
-        ),
-        backgroundColor: Colors.white,
-        selectedColor: scheme.primaryContainer,
-        labelStyle: TextStyle(
-          fontWeight: FontWeight.w600,
-          color: scheme.onSurfaceVariant,
-          fontSize: 13,
-        ),
-        secondaryLabelStyle: TextStyle(
-          fontWeight: FontWeight.w700,
-          color: scheme.onPrimaryContainer,
-          fontSize: 13,
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: scheme.surfaceContainer,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: AppDimens.md,
-          vertical: AppDimens.sm,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20.0),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20.0),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20.0),
-          borderSide: BorderSide(color: scheme.primary, width: 2),
-        ),
-      ),
-      floatingActionButtonTheme: FloatingActionButtonThemeData(
-        elevation: 3,
-        backgroundColor: scheme.primary,
-        foregroundColor: scheme.onPrimary,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.0),
-        ),
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          elevation: 0,
-          backgroundColor: scheme.primary,
-          foregroundColor: scheme.onPrimary,
-          shape: const StadiumBorder(),
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppDimens.lg,
-            vertical: AppDimens.md,
-          ),
-        ),
-      ),
-      filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(
-          shape: const StadiumBorder(),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        ),
-      ),
-    );
-  }
-
-  static ThemeData darkTheme([ColorScheme? dynamicColorScheme]) {
-    final ColorScheme scheme = dynamicColorScheme ??
-        ColorScheme.fromSeed(
-          seedColor: AppColors.primary,
-          brightness: Brightness.dark,
-      primary: const Color(0xFF6CDAA8),
-      onPrimary: const Color(0xFF003825),
-      primaryContainer: const Color(0xFF005238),
-      onPrimaryContainer: const Color(0xFFD6F5E5),
-      surface: AppColors.surfaceDark,
-      surfaceContainer: const Color(0xFF1E2220),
-      surfaceContainerHigh: const Color(0xFF282D2A),
-      surfaceContainerLow: const Color(0xFF181B19),
-      surfaceContainerLowest: const Color(0xFF101211),
-      onSurface: const Color(0xFFE2E4E1),
-      onSurfaceVariant: const Color(0xFFA2A7A3),
-    );
-
-    return ThemeData(
-      useMaterial3: true,
-      brightness: Brightness.dark,
-      colorScheme: scheme,
-      scaffoldBackgroundColor: scheme.surface,
-      appBarTheme: AppBarTheme(
         centerTitle: false,
-        elevation: 0,
+        elevation: AppDimens.elevationNone,
         backgroundColor: scheme.surface,
-        scrolledUnderElevation: 0,
+        scrolledUnderElevation: AppDimens.elevationNone,
         titleTextStyle: TextStyle(
           color: scheme.onSurface,
-          fontSize: 22,
-          fontWeight: FontWeight.w800,
-          letterSpacing: -0.5,
+          fontSize: 24,
+          fontWeight: FontWeight.w600,
+          letterSpacing: -0.3,
         ),
       ),
-      cardTheme: CardThemeData(
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(22.0),
+      navigationDrawerTheme: NavigationDrawerThemeData(
+        backgroundColor: scheme.surface,
+        indicatorColor: scheme.primaryContainer,
+        indicatorShape: const StadiumBorder(),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: scheme.surfaceContainerLow,
+        modalBackgroundColor: scheme.surfaceContainerLow,
+        surfaceTintColor: Colors.transparent,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(AppDimens.radiusLg)),
         ),
-        color: scheme.surfaceContainerLow,
+        showDragHandle: true,
+      ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppDimens.radiusMd),
+        ),
+        backgroundColor: scheme.inverseSurface,
+        contentTextStyle: TextStyle(color: scheme.onInverseSurface),
+      ),
+      dividerTheme: DividerThemeData(
+        color: scheme.outlineVariant.withValues(alpha: 0.5),
+        thickness: 1.0,
+        space: 1.0,
+      ),
+      cardTheme: CardThemeData(
+        elevation: AppDimens.elevationNone,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppDimens.radiusLg),
+        ),
+        color: scheme.surfaceContainer,
         clipBehavior: Clip.antiAlias,
       ),
       searchBarTheme: SearchBarThemeData(
-        elevation: const WidgetStatePropertyAll(0),
+        elevation: const WidgetStatePropertyAll(AppDimens.elevationNone),
         backgroundColor: WidgetStatePropertyAll(scheme.surfaceContainerHigh),
         shape: const WidgetStatePropertyAll(StadiumBorder()),
         padding: const WidgetStatePropertyAll(
@@ -203,7 +105,7 @@ class AppTheme {
           color: scheme.onPrimaryContainer,
           fontSize: 13,
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -222,34 +124,215 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20.0),
-          borderSide: BorderSide(color: scheme.primaryContainer, width: 2),
+          borderSide: BorderSide(color: scheme.primary, width: 2),
         ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        elevation: 2,
-        backgroundColor: scheme.primaryContainer,
-        foregroundColor: scheme.onPrimaryContainer,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.0),
-        ),
+        elevation: AppDimens.elevationNone,
+        backgroundColor: scheme.primary,
+        foregroundColor: scheme.onPrimary,
+        shape: const StadiumBorder(),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          elevation: 0,
-          backgroundColor: scheme.primaryContainer,
-          foregroundColor: scheme.onPrimaryContainer,
+          elevation: AppDimens.elevationNone,
+          backgroundColor: scheme.primary,
+          foregroundColor: scheme.onPrimary,
           shape: const StadiumBorder(),
           padding: const EdgeInsets.symmetric(
             horizontal: AppDimens.lg,
-            vertical: AppDimens.md,
+            vertical: 12.0,
+          ),
+          textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          elevation: AppDimens.elevationNone,
+          backgroundColor: scheme.primary,
+          foregroundColor: scheme.onPrimary,
+          shape: const StadiumBorder(),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+        ),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: scheme.surface,
+        elevation: AppDimens.elevationNone,
+        indicatorColor: scheme.primaryContainer,
+        indicatorShape: const StadiumBorder(),
+      ),
+    );
+  }
+
+  static ThemeData darkTheme([ColorScheme? dynamicColorScheme]) {
+    final ColorScheme scheme = dynamicColorScheme ??
+        const ColorScheme.dark(
+          primary: AppColors.primary,
+          onPrimary: AppColors.onPrimary,
+          primaryContainer: AppColors.primaryContainer,
+          onPrimaryContainer: AppColors.onPrimaryContainer,
+          secondary: AppColors.secondary,
+          onSecondary: AppColors.onSecondary,
+          secondaryContainer: AppColors.secondaryContainer,
+          onSecondaryContainer: AppColors.onSecondaryContainer,
+          tertiary: AppColors.tertiary,
+          onTertiary: AppColors.onTertiary,
+          surface: AppColors.surfaceDark,
+          surfaceContainer: AppColors.surfaceContainerDark,
+          surfaceContainerHigh: AppColors.surfaceContainerHighDark,
+          surfaceContainerHighest: AppColors.surfaceContainerHighestDark,
+          surfaceContainerLow: AppColors.surfaceContainerLowDark,
+          surfaceContainerLowest: AppColors.surfaceContainerLowestDark,
+          onSurface: AppColors.textPrimaryDark,
+          onSurfaceVariant: AppColors.textSecondaryDark,
+          outline: AppColors.outlineDark,
+          outlineVariant: AppColors.outlineVariantDark,
+          error: AppColors.error,
+          onError: AppColors.onError,
+        );
+
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      colorScheme: scheme,
+      scaffoldBackgroundColor: scheme.surface,
+      appBarTheme: AppBarTheme(
+        centerTitle: false,
+        elevation: AppDimens.elevationNone,
+        backgroundColor: scheme.surface,
+        scrolledUnderElevation: AppDimens.elevationNone,
+        titleTextStyle: TextStyle(
+          color: scheme.onSurface,
+          fontSize: 26,
+          fontWeight: FontWeight.w500,
+          letterSpacing: -0.3,
+        ),
+      ),
+      navigationDrawerTheme: NavigationDrawerThemeData(
+        backgroundColor: scheme.surface,
+        indicatorColor: scheme.primaryContainer,
+        indicatorShape: const StadiumBorder(),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: scheme.surfaceContainer,
+        modalBackgroundColor: scheme.surfaceContainer,
+        surfaceTintColor: Colors.transparent,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(AppDimens.radiusLg)),
+        ),
+        showDragHandle: true,
+        dragHandleColor: scheme.onSurfaceVariant.withValues(alpha: 0.4),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppDimens.radiusMd),
+        ),
+        backgroundColor: scheme.inverseSurface,
+        contentTextStyle: TextStyle(color: scheme.onInverseSurface),
+      ),
+      dividerTheme: DividerThemeData(
+        color: scheme.outlineVariant.withValues(alpha: 0.6),
+        thickness: 1.0,
+        space: 1.0,
+      ),
+      cardTheme: CardThemeData(
+        elevation: AppDimens.elevationNone,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppDimens.radiusLg),
+        ),
+        color: scheme.surfaceContainer,
+        clipBehavior: Clip.antiAlias,
+      ),
+      searchBarTheme: SearchBarThemeData(
+        elevation: const WidgetStatePropertyAll(AppDimens.elevationNone),
+        backgroundColor: WidgetStatePropertyAll(scheme.surfaceContainerHigh),
+        shape: const WidgetStatePropertyAll(StadiumBorder()),
+        padding: const WidgetStatePropertyAll(
+          EdgeInsets.symmetric(horizontal: 16.0),
+        ),
+        hintStyle: WidgetStatePropertyAll(
+          TextStyle(color: scheme.onSurfaceVariant, fontSize: 14),
+        ),
+      ),
+      chipTheme: ChipThemeData(
+        shape: const StadiumBorder(),
+        side: BorderSide.none,
+        backgroundColor: scheme.surfaceContainerHigh,
+        selectedColor: scheme.primary,
+        labelStyle: TextStyle(
+          fontWeight: FontWeight.w600,
+          color: scheme.onSurfaceVariant,
+          fontSize: 13,
+        ),
+        secondaryLabelStyle: TextStyle(
+          fontWeight: FontWeight.w700,
+          color: scheme.onPrimary,
+          fontSize: 13,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: scheme.surfaceContainerHigh,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppDimens.md,
+          vertical: AppDimens.sm,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20.0),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20.0),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20.0),
+          borderSide: BorderSide(color: scheme.primary, width: 2),
+        ),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        elevation: AppDimens.elevationNone,
+        backgroundColor: scheme.primary,
+        foregroundColor: scheme.onPrimary,
+        shape: const StadiumBorder(),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          elevation: AppDimens.elevationNone,
+          backgroundColor: scheme.primary,
+          foregroundColor: scheme.onPrimary,
+          shape: const StadiumBorder(),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppDimens.lg,
+            vertical: 12.0,
+          ),
+          textStyle: const TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 14,
           ),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
+          elevation: AppDimens.elevationNone,
+          backgroundColor: scheme.primary,
+          foregroundColor: scheme.onPrimary,
           shape: const StadiumBorder(),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          textStyle: const TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 14,
+          ),
         ),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: scheme.surface,
+        elevation: AppDimens.elevationNone,
+        indicatorColor: scheme.primaryContainer,
+        indicatorShape: const StadiumBorder(),
       ),
     );
   }

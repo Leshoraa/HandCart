@@ -9,6 +9,8 @@ class ShoppingProductTile extends StatelessWidget {
   final int quantity;
   final VoidCallback onIncrement;
   final VoidCallback onDecrement;
+  final bool isFirst;
+  final bool isLast;
 
   const ShoppingProductTile({
     super.key,
@@ -16,193 +18,240 @@ class ShoppingProductTile extends StatelessWidget {
     required this.quantity,
     required this.onIncrement,
     required this.onDecrement,
+    this.isFirst = false,
+    this.isLast = false,
   });
+
+  String _formatPrice(num amount) {
+    try {
+      return CurrencyFormatter.formatNumber(amount);
+    } catch (_) {
+      if (amount == 0) return '0';
+      if (amount % 1 == 0) return amount.toInt().toString();
+      return amount.toStringAsFixed(2);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = colorScheme.brightness == Brightness.dark;
+
+    final BorderRadius borderRadius;
+    if (isFirst && isLast) {
+      borderRadius = BorderRadius.circular(AppDimens.radiusLg);
+    } else if (isFirst) {
+      borderRadius = const BorderRadius.vertical(
+        top: Radius.circular(AppDimens.radiusLg),
+      );
+    } else if (isLast) {
+      borderRadius = const BorderRadius.vertical(
+        bottom: Radius.circular(AppDimens.radiusLg),
+      );
+    } else {
+      borderRadius = BorderRadius.zero;
+    }
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12.0),
       decoration: BoxDecoration(
-        color: colorScheme.brightness == Brightness.light
-            ? Colors.white
-            : colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(20.0),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.brightness == Brightness.light
-                ? Colors.black.withValues(alpha: 0.035)
-                : Colors.black.withValues(alpha: 0.2),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        color: isDark
+            ? colorScheme.surfaceContainer
+            : colorScheme.surfaceContainerLow,
+        borderRadius: borderRadius,
       ),
-      padding: const EdgeInsets.all(12.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Product Image Thumbnail
-          ClipRRect(
-            borderRadius: BorderRadius.circular(16.0),
-            child: Container(
-              width: 72,
-              height: 72,
-              color: colorScheme.surfaceContainerHigh.withValues(alpha: 0.5),
-              child: product.imageUrl != null
-                  ? Image.network(
-                      product.imageUrl!,
-                      fit: BoxFit.cover,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Center(
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded /
-                                    loadingProgress.expectedTotalBytes!
-                                : null,
-                          ),
-                        );
-                      },
-                      errorBuilder: (context, error, stackTrace) => Center(
-                        child: Icon(
-                          product.icon,
-                          size: 32,
-                          color: colorScheme.primary,
-                        ),
-                      ),
-                    )
-                  : Center(
-                      child: Icon(
-                        product.icon,
-                        size: 32,
-                        color: colorScheme.primary,
-                      ),
-                    ),
-            ),
-          ),
-
-          const SizedBox(width: 14.0),
-
-          // Name, Description, Unit Price
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(
-                  product.name,
-                  style: TextStyle(
-                    fontSize: 15.0,
-                    fontWeight: FontWeight.w800,
-                    color: colorScheme.onSurface,
-                    letterSpacing: -0.3,
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(AppDimens.radiusMd),
+                  child: Container(
+                    width: 72,
+                    height: 72,
+                    color:
+                        colorScheme.surfaceContainerHigh.withValues(alpha: 0.5),
+                    child: product.imageUrl != null
+                        ? Image.network(
+                            product.imageUrl!,
+                            fit: BoxFit.cover,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  value: loadingProgress.expectedTotalBytes !=
+                                          null
+                                      ? loadingProgress
+                                              .cumulativeBytesLoaded /
+                                          loadingProgress.expectedTotalBytes!
+                                      : null,
+                                ),
+                              );
+                            },
+                            errorBuilder: (context, error, stackTrace) =>
+                                Center(
+                              child: Icon(
+                                product.icon,
+                                size: 32,
+                                color: colorScheme.primary,
+                              ),
+                            ),
+                          )
+                        : Center(
+                            child: Icon(
+                              product.icon,
+                              size: 32,
+                              color: colorScheme.primary,
+                            ),
+                          ),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 3.0),
-                Text(
-                  product.description,
-                  style: TextStyle(
-                    fontSize: 12.0,
-                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.85),
-                    height: 1.25,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 6.0),
-                Text(
-                  CurrencyFormatter.format(product.price),
-                  style: TextStyle(
-                    fontSize: 14.5,
-                    fontWeight: FontWeight.w900,
-                    color: colorScheme.primary,
-                  ),
-                ),
-              ],
-            ),
-          ),
 
-          const SizedBox(width: 10.0),
+                const SizedBox(width: 14.0),
 
-          // Stepper [- 1 +] Control
-          if (quantity == 0)
-            Material(
-              color: colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(12.0),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(12.0),
-                onTap: onIncrement,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10.0,
-                    vertical: 7.0,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        Icons.add_rounded,
-                        size: 16.0,
-                        color: colorScheme.onPrimaryContainer,
-                      ),
-                      const SizedBox(width: 3.0),
                       Text(
-                        AppStrings.addToCart,
-                        style: TextStyle(
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w800,
-                          color: colorScheme.onPrimaryContainer,
+                        product.name,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: colorScheme.onSurface,
+                          letterSpacing: -0.2,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
+                      if (product.description.isNotEmpty) ...[
+                        const SizedBox(height: 3.0),
+                        Text(
+                          product.description,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                            height: 1.25,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                      if (product.price > 0) ...[
+                        const SizedBox(height: 5.0),
+                        Text(
+                          quantity > 1
+                              ? '${_formatPrice(product.price)} × $quantity = ${_formatPrice(product.price * quantity)}'
+                              : _formatPrice(product.price),
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
-              ),
-            )
-          else
-            Container(
-              height: 34,
-              decoration: BoxDecoration(
-                color: colorScheme.primary,
-                borderRadius: BorderRadius.circular(AppDimens.radiusFull),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 30),
-                    icon: Icon(
-                      Icons.remove_rounded,
-                      size: 16.0,
-                      color: colorScheme.onPrimary,
-                    ),
-                    onPressed: onDecrement,
-                  ),
-                  Text(
-                    '$quantity',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 13.5,
-                      color: colorScheme.onPrimary,
-                    ),
-                  ),
-                  IconButton(
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 30),
-                    icon: Icon(
-                      Icons.add_rounded,
-                      size: 16.0,
-                      color: colorScheme.onPrimary,
+
+                const SizedBox(width: 10.0),
+
+                if (quantity == 0)
+                  OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: colorScheme.primary,
+                      side: BorderSide(
+                        color: colorScheme.primary,
+                        width: 1.5,
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14.0,
+                        vertical: 6.0,
+                      ),
+                      minimumSize: const Size(0, 36),
+                      shape: const StadiumBorder(),
                     ),
                     onPressed: onIncrement,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.add_rounded,
+                          size: 16.0,
+                          color: colorScheme.primary,
+                        ),
+                        const SizedBox(width: 4.0),
+                        Text(
+                          AppStrings.addToCart,
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  Container(
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      borderRadius:
+                          BorderRadius.circular(AppDimens.radiusFull),
+                      border: Border.all(
+                        color: colorScheme.primary,
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(minWidth: 32),
+                          icon: Icon(
+                            Icons.remove_rounded,
+                            size: 16.0,
+                            color: colorScheme.primary,
+                          ),
+                          onPressed: onDecrement,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: Text(
+                            '$quantity',
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: colorScheme.primary,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(minWidth: 32),
+                          icon: Icon(
+                            Icons.add_rounded,
+                            size: 16.0,
+                            color: colorScheme.primary,
+                          ),
+                          onPressed: onIncrement,
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
+              ],
+            ),
+          ),
+          if (!isLast)
+            Divider(
+              height: 1,
+              thickness: 1,
+              indent: 16,
+              endIndent: 16,
+              color: colorScheme.outlineVariant.withValues(alpha: 0.35),
             ),
         ],
       ),

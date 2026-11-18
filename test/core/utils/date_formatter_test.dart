@@ -16,7 +16,7 @@ void main() {
     test('formatRelativeDate returns day, month, date, year for older dates', () {
       final sampleDate = DateTime(2026, 1, 19); // Jan 19, 2026 was a Monday
       final formatted = DateFormatter.formatRelativeDate(sampleDate);
-      expect(formatted, equals('Monday, Jan 19, 2026'));
+      expect(formatted, equals('Monday, 19 Jan 2026'));
     });
   });
 }

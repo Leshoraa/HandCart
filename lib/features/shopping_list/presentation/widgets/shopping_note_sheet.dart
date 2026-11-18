@@ -17,6 +17,7 @@ class ShoppingNoteSheet extends StatefulWidget {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      showDragHandle: true,
       backgroundColor: colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28.0)),
@@ -54,6 +55,16 @@ class _ShoppingNoteSheetState extends State<ShoppingNoteSheet> {
     super.dispose();
   }
 
+  String _formatPrice(num amount) {
+    try {
+      return CurrencyFormatter.formatNumber(amount);
+    } catch (_) {
+      if (amount == 0) return '0';
+      if (amount % 1 == 0) return amount.toInt().toString();
+      return amount.toStringAsFixed(2);
+    }
+  }
+
   void _save(BuildContext context) {
     final planner = ShoppingPlannerScope.of(context);
     planner.updateStoreNote(widget.store.id, _noteController.text);
@@ -69,38 +80,24 @@ class _ShoppingNoteSheetState extends State<ShoppingNoteSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final planner = ShoppingPlannerScope.of(context);
-    final totalExpense = planner.getStoreTotalPrice(widget.store.id);
     final itemCount = planner.getStoreItemCount(widget.store.id);
+    final totalPrice = planner.getStoreTotalPrice(widget.store.id);
 
     return Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom + 20,
         left: 20,
         right: 20,
-        top: 20,
+        top: 8,
       ),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Handle bar
-            Center(
-              child: Container(
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 18),
-
-            // Header Title
             Row(
               children: [
                 Container(
@@ -122,16 +119,16 @@ class _ShoppingNoteSheetState extends State<ShoppingNoteSheet> {
                     children: [
                       Text(
                         AppStrings.shoppingNotes,
-                        style: TextStyle(
-                          fontSize: 18,
+                        style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w800,
                           color: colorScheme.onSurface,
                         ),
                       ),
                       Text(
-                        widget.store.name,
-                        style: TextStyle(
-                          fontSize: 13,
+                        totalPrice > 0
+                            ? '${widget.store.name} • $itemCount ${itemCount == 1 ? AppStrings.singleItemPlanned : AppStrings.itemsPlanned} • Total: ${_formatPrice(totalPrice)}'
+                            : '${widget.store.name} • $itemCount ${itemCount == 1 ? AppStrings.singleItemPlanned : AppStrings.itemsPlanned}',
+                        style: theme.textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: colorScheme.primary,
                         ),
@@ -144,72 +141,22 @@ class _ShoppingNoteSheetState extends State<ShoppingNoteSheet> {
 
             const SizedBox(height: 16),
 
-            // Live Shopping Expense Summary Box
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHigh.withValues(alpha: 0.6),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        AppStrings.totalExpense,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '$itemCount ${itemCount == 1 ? AppStrings.singleItemPlanned : AppStrings.itemsPlanned}',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: colorScheme.onSurface,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Text(
-                    CurrencyFormatter.format(totalExpense),
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
-                      color: colorScheme.primary,
-                      letterSpacing: -0.3,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
             Text(
               'Shopping Memos & Checklist',
-              style: TextStyle(
-                fontSize: 13,
+              style: theme.textTheme.labelMedium?.copyWith(
                 fontWeight: FontWeight.w700,
                 color: colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 8),
 
-            // Note Text Field
             TextField(
               controller: _noteController,
               maxLines: 5,
               textCapitalization: TextCapitalization.sentences,
               decoration: InputDecoration(
                 hintText: AppStrings.notesHint,
-                hintStyle: TextStyle(
-                  fontSize: 13,
+                hintStyle: theme.textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
                 ),
                 filled: true,
@@ -223,18 +170,17 @@ class _ShoppingNoteSheetState extends State<ShoppingNoteSheet> {
 
             const SizedBox(height: 20),
 
-            // Save Note Button
             SizedBox(
               width: double.infinity,
               height: 48,
               child: FilledButton.icon(
                 onPressed: () => _save(context),
                 icon: const Icon(Icons.check_rounded),
-                label: const Text(
+                label: Text(
                   AppStrings.saveNotes,
-                  style: TextStyle(
-                    fontSize: 15,
+                  style: theme.textTheme.labelLarge?.copyWith(
                     fontWeight: FontWeight.w800,
+                    color: colorScheme.onPrimary,
                   ),
                 ),
                 style: FilledButton.styleFrom(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_dimens.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../core/widgets/empty_state_view.dart';
 import '../../../stores/data/models/store_model.dart';
 import '../../data/models/product_model.dart';
 import '../../state/shopping_planner_scope.dart';
@@ -42,90 +43,164 @@ class _StoreProductListPageState extends State<StoreProductListPage> {
     });
   }
 
-  void _showAddProductDialog(BuildContext context) {
+  void _showAddProductSheet(BuildContext context) {
     final nameController = TextEditingController();
     final priceController = TextEditingController();
     final descController = TextEditingController();
 
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Text(
-          AppStrings.addNewItem,
-          style: TextStyle(fontWeight: FontWeight.w800),
-        ),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(
-                  labelText: AppStrings.itemName,
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: priceController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(
-                  labelText: AppStrings.itemPrice,
-                  prefixText: '\$ ',
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: descController,
-                decoration: const InputDecoration(
-                  labelText: 'Short Description',
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text(AppStrings.cancel),
-          ),
-          FilledButton(
-            onPressed: () {
-              final name = nameController.text.trim();
-              final price = double.tryParse(priceController.text.trim()) ?? 0.0;
-              final desc = descController.text.trim();
-
-              if (name.isNotEmpty && price > 0) {
-                final planner = ShoppingPlannerScope.of(context);
-                final newProduct = Product(
-                  id: 'item_${DateTime.now().millisecondsSinceEpoch}',
-                  storeId: widget.store.id,
-                  name: name,
-                  category: widget.store.category,
-                  price: price,
-                  description: desc.isEmpty ? 'Shopping item' : desc,
-                  icon: Icons.shopping_basket_rounded,
-                );
-                planner.addProduct(newProduct);
-                planner.incrementQuantity(newProduct);
-                Navigator.pop(ctx);
-              }
-            },
-            style: FilledButton.styleFrom(shape: const StadiumBorder()),
-            child: const Text(AppStrings.saveItem),
-          ),
-        ],
+      isScrollControlled: true,
+      showDragHandle: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
+      builder: (ctx) {
+        final colorScheme = Theme.of(ctx).colorScheme;
+        final theme = Theme.of(ctx);
+
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+            left: 20,
+            right: 20,
+            top: 4,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primaryContainer,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.add_shopping_cart_rounded,
+                        size: 22,
+                        color: colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            AppStrings.addNewItem,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                          Text(
+                            'Planned item for ${widget.store.name}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: nameController,
+                  autofocus: true,
+                  textCapitalization: TextCapitalization.words,
+                  decoration: const InputDecoration(
+                    labelText: AppStrings.itemName,
+                    prefixIcon: Icon(Icons.shopping_bag_outlined),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: priceController,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  decoration: const InputDecoration(
+                    labelText: 'Price (optional)',
+                    hintText: 'e.g. 15000',
+                    prefixIcon: Icon(Icons.tag_rounded),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: descController,
+                  minLines: 2,
+                  maxLines: 4,
+                  textCapitalization: TextCapitalization.sentences,
+                  decoration: const InputDecoration(
+                    labelText: 'Short Description',
+                    prefixIcon: Icon(Icons.notes_rounded),
+                    alignLabelWithHint: true,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: FilledButton(
+                    onPressed: () {
+                      final name = nameController.text.trim();
+                      final price = double.tryParse(
+                            priceController.text.trim().replaceAll(',', '.'),
+                          ) ??
+                          0.0;
+                      final desc = descController.text.trim();
+
+                      if (name.isNotEmpty) {
+                        final planner = ShoppingPlannerScope.of(context);
+                        final newProduct = Product(
+                          id: 'item_${DateTime.now().millisecondsSinceEpoch}',
+                          storeId: widget.store.id,
+                          name: name,
+                          category: widget.store.category,
+                          price: price,
+                          description: desc.isEmpty ? 'Shopping item' : desc,
+                          icon: Icons.shopping_basket_rounded,
+                        );
+                        planner.addProduct(newProduct);
+                        planner.incrementQuantity(newProduct);
+                        Navigator.pop(ctx);
+                      }
+                    },
+                    style: FilledButton.styleFrom(
+                      shape: const StadiumBorder(),
+                    ),
+                    child: Text(
+                      AppStrings.saveItem,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: colorScheme.onPrimary,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final planner = ShoppingPlannerScope.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
     final products = planner.getProductsForStore(widget.store.id);
-    final totalExpense = planner.getStoreTotalPrice(widget.store.id);
-    final itemCount = planner.getStoreItemCount(widget.store.id);
+    final totalQuantity = planner.getStoreItemCount(widget.store.id);
+    final distinctCount =
+        products.where((p) => planner.getProductQuantity(p.id) > 0).length;
+    final totalPrice = planner.getStoreTotalPrice(widget.store.id);
 
     final filteredProducts = products.where((product) {
       if (_searchQuery.isEmpty) return true;
@@ -142,24 +217,21 @@ class _StoreProductListPageState extends State<StoreProductListPage> {
           children: [
             Text(
               widget.store.name,
-              style: TextStyle(
+              style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w800,
-                fontSize: 18.0,
                 color: colorScheme.onSurface,
               ),
             ),
             Text(
               widget.store.category,
-              style: TextStyle(
+              style: theme.textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.w600,
-                fontSize: 12.0,
                 color: colorScheme.onSurfaceVariant,
               ),
             ),
           ],
         ),
         actions: [
-          // Note Menu Button in Top-Right
           Padding(
             padding: const EdgeInsets.only(right: AppDimens.md),
             child: IconButton.filledTonal(
@@ -176,7 +248,6 @@ class _StoreProductListPageState extends State<StoreProductListPage> {
       ),
       body: CustomScrollView(
         slivers: [
-          // Search Bar
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(
@@ -230,7 +301,6 @@ class _StoreProductListPageState extends State<StoreProductListPage> {
             ),
           ),
 
-          // Header Summary Row
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(
@@ -239,54 +309,26 @@ class _StoreProductListPageState extends State<StoreProductListPage> {
                 AppDimens.md,
                 AppDimens.sm + 4,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Items to Buy (${filteredProducts.length})',
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w800,
-                      color: colorScheme.onSurface,
-                    ),
-                  ),
-                  TextButton.icon(
-                    onPressed: () => _showAddProductDialog(context),
-                    icon: const Icon(Icons.add_rounded, size: 18),
-                    label: const Text(
-                      AppStrings.addNewItem,
-                      style: TextStyle(fontWeight: FontWeight.w700),
-                    ),
-                  ),
-                ],
+              child: Text(
+                'Items to Buy (${filteredProducts.length})',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: colorScheme.onSurface,
+                ),
               ),
             ),
           ),
 
-          // Single-Column Vertical List of Products
           if (filteredProducts.isEmpty)
             SliverFillRemaining(
               hasScrollBody: false,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.shopping_basket_outlined,
-                      size: 64,
-                      color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      AppStrings.noProductsFound,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
+              child: EmptyStateView(
+                icon: Icons.shopping_basket_outlined,
+                title: AppStrings.noProductsFound,
+                message:
+                    'No items found. Tap Add Item to add products to your list.',
+                buttonLabel: AppStrings.addNewItem,
+                onButtonPressed: () => _showAddProductSheet(context),
               ),
             )
           else
@@ -300,6 +342,8 @@ class _StoreProductListPageState extends State<StoreProductListPage> {
                     return ShoppingProductTile(
                       product: product,
                       quantity: qty,
+                      isFirst: index == 0,
+                      isLast: index == filteredProducts.length - 1,
                       onIncrement: () => planner.incrementQuantity(product),
                       onDecrement: () => planner.decrementQuantity(product.id),
                     );
@@ -314,10 +358,28 @@ class _StoreProductListPageState extends State<StoreProductListPage> {
           ),
         ],
       ),
-      bottomNavigationBar: itemCount > 0
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _showAddProductSheet(context),
+        elevation: 3,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.0),
+        ),
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
+        icon: const Icon(Icons.add_rounded),
+        label: Text(
+          AppStrings.addNewItem,
+          style: theme.textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w800,
+            color: colorScheme.onPrimary,
+          ),
+        ),
+      ),
+      bottomNavigationBar: totalQuantity > 0
           ? StoreExpenseBottomBar(
-              itemCount: itemCount,
-              totalPrice: totalExpense,
+              itemCount: distinctCount,
+              totalQuantity: totalQuantity,
+              totalPrice: totalPrice,
               onClear: () => planner.clearStoreItems(widget.store.id),
             )
           : null,

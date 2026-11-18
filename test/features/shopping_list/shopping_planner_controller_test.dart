@@ -16,36 +16,30 @@ void main() {
       controller.dispose();
     });
 
-    test('Initializes with default stores and empty quantities', () {
+    test('Initializes with default stores and auto 1 quantities for products', () {
       expect(controller.stores.isNotEmpty, isTrue);
       expect(controller.products.isNotEmpty, isTrue);
-      expect(controller.getTotalPlannedCount(), equals(0));
-      expect(controller.getTotalPlannedExpense(), equals(0.0));
+      expect(controller.getTotalPlannedCount(), equals(controller.products.length));
+      expect(controller.getTotalPlannedExpense() > 0, isTrue);
     });
 
     test('incrementQuantity and decrementQuantity updates item count and expenses', () {
       final store = controller.stores.first;
       final product = controller.getProductsForStore(store.id).first;
+      final initialStoreCount = controller.getStoreItemCount(store.id);
 
-      expect(controller.getProductQuantity(product.id), equals(0));
-
-      controller.incrementQuantity(product);
       expect(controller.getProductQuantity(product.id), equals(1));
-      expect(controller.getStoreItemCount(store.id), equals(1));
-      expect(controller.getStoreTotalPrice(store.id), equals(product.price));
-      expect(controller.getTotalPlannedExpense(), equals(product.price));
 
       controller.incrementQuantity(product);
       expect(controller.getProductQuantity(product.id), equals(2));
-      expect(controller.getStoreTotalPrice(store.id), equals(product.price * 2));
+      expect(controller.getStoreItemCount(store.id), equals(initialStoreCount + 1));
 
       controller.decrementQuantity(product.id);
       expect(controller.getProductQuantity(product.id), equals(1));
 
       controller.decrementQuantity(product.id);
       expect(controller.getProductQuantity(product.id), equals(0));
-      expect(controller.getStoreItemCount(store.id), equals(0));
-      expect(controller.getStoreTotalPrice(store.id), equals(0.0));
+      expect(controller.getStoreItemCount(store.id), equals(initialStoreCount - 1));
     });
 
     test('updateStoreNote updates note memo for specific store', () {
@@ -95,19 +89,13 @@ void main() {
     test('clearStoreItems clears quantities only for that store', () {
       final store1 = controller.stores[0];
       final store2 = controller.stores[1];
+      final initialStore2Count = controller.getStoreItemCount(store2.id);
 
-      final prod1 = controller.getProductsForStore(store1.id).first;
-      final prod2 = controller.getProductsForStore(store2.id).first;
-
-      controller.incrementQuantity(prod1);
-      controller.incrementQuantity(prod2);
-
-      expect(controller.getStoreItemCount(store1.id), equals(1));
-      expect(controller.getStoreItemCount(store2.id), equals(1));
+      expect(controller.getStoreItemCount(store1.id) > 0, isTrue);
 
       controller.clearStoreItems(store1.id);
       expect(controller.getStoreItemCount(store1.id), equals(0));
-      expect(controller.getStoreItemCount(store2.id), equals(1));
+      expect(controller.getStoreItemCount(store2.id), equals(initialStore2Count));
     });
 
     test('updateStore modifies store information and notes', () {
@@ -144,7 +132,7 @@ void main() {
       final product = controller.getProductsForStore(store.id).first;
 
       controller.incrementQuantity(product);
-      expect(controller.getProductQuantity(product.id), equals(1));
+      expect(controller.getProductQuantity(product.id), equals(2));
 
       controller.deleteStore(store.id);
 

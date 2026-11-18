@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:handcart/app.dart';
 import 'package:handcart/core/constants/app_strings.dart';
+import 'package:handcart/features/stores/presentation/widgets/store_card.dart';
 
 void main() {
   testWidgets('StoreListPage: Date grouping (Today over Yesterday), 3-dots menu actions, and category tabs',
@@ -75,5 +76,19 @@ void main() {
     final todayTop = tester.getTopLeft(find.text('Today')).dy;
     final yesterdayTop = tester.getTopLeft(find.text('Yesterday')).dy;
     expect(todayTop < yesterdayTop, isTrue);
+
+    // 6. Verify Flexible Row Heights:
+    // Cards in the same row share identical height matching the tallest sibling in that row
+    final grandFreshSize =
+        tester.getSize(find.widgetWithText(StoreCard, 'Grand Fresh Market'));
+    final bakerySize =
+        tester.getSize(find.widgetWithText(StoreCard, 'Artisan Bakery & Cafe'));
+    expect(grandFreshSize.height, equals(bakerySize.height));
+
+    // A single store in a row (e.g. Daily Express Mart under Today) adapts flexibly without fixed height waste
+    final singleStoreSize =
+        tester.getSize(find.widgetWithText(StoreCard, 'Daily Express Mart'));
+    expect(singleStoreSize.height, isPositive);
+    expect(singleStoreSize.height < 254.0, isTrue);
   });
 }

@@ -52,7 +52,6 @@ class StoreDummyData {
   }
 
   static const List<Product> initialProducts = [
-    // Store 1: Grand Fresh Market
     Product(
       id: 'prod_101',
       storeId: 'store_1',
@@ -98,7 +97,6 @@ class StoreDummyData {
       imageUrl: 'https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=500&auto=format&fit=crop&q=80',
     ),
 
-    // Store 2: Artisan Bakery & Cafe
     Product(
       id: 'prod_201',
       storeId: 'store_2',
@@ -133,7 +131,6 @@ class StoreDummyData {
       imageUrl: 'https://images.unsplash.com/photo-1517256064527-09c73fc73e38?w=500&auto=format&fit=crop&q=80',
     ),
 
-    // Store 3: Green Leaf Organic Mart
     Product(
       id: 'prod_301',
       storeId: 'store_3',
@@ -168,7 +165,6 @@ class StoreDummyData {
       imageUrl: 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=500&auto=format&fit=crop&q=80',
     ),
 
-    // Store 4: Daily Corner Mart
     Product(
       id: 'prod_401',
       storeId: 'store_4',

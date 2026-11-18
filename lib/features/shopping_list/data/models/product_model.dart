@@ -16,7 +16,7 @@ class Product {
     required this.storeId,
     required this.name,
     required this.category,
-    required this.price,
+    this.price = 0.0,
     required this.description,
     required this.icon,
     this.rating = 4.8,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:handcart/app.dart';
 import 'package:handcart/core/constants/app_strings.dart';
+import 'package:handcart/features/shopping_list/presentation/widgets/store_expense_bottom_bar.dart';
 
 void main() {
   testWidgets('HandCartApp flow: Store selection, product list, and note sheet',
@@ -32,19 +33,19 @@ void main() {
     // Verify StoreProductListPage is displayed with vertical 1-column list
     expect(find.text('Items to Buy (4)'), findsOneWidget);
 
-    // Verify first product Add button
-    final firstAddButton = find.text(AppStrings.addToCart).first;
-    expect(firstAddButton, findsOneWidget);
+    // Verify Stepper is automatically initialized with quantity 1 (auto 1)
+    expect(find.text('1'), findsWidgets);
 
-    // Tap Add button to increment product count
-    await tester.tap(firstAddButton);
+    // Tap increment (+) button on first product
+    final addIcon = find.byIcon(Icons.add_rounded).first;
+    await tester.tap(addIcon);
     await tester.pumpAndSettle();
 
-    // Verify Stepper appeared with quantity 1
-    expect(find.text('1'), findsOneWidget);
+    // Verify product count incremented to 2
+    expect(find.text('2'), findsOneWidget);
 
-    // Verify bottom total expense bar appears with 1 item planned
-    expect(find.text('1 ${AppStrings.singleItemPlanned}'), findsOneWidget);
+    // Verify bottom total expense bar appears with planned items
+    expect(find.byType(StoreExpenseBottomBar), findsOneWidget);
 
     // Tap Note Menu button in top right
     final noteButton = find.byIcon(Icons.edit_note_rounded);

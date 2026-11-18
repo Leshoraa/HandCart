@@ -19,6 +19,9 @@ class ShoppingPlannerController extends ChangeNotifier {
     for (final store in _stores) {
       _storeNotes[store.id] = store.note;
     }
+    for (final product in _products) {
+      _quantities[product.id] = 1;
+    }
   }
 
   List<Store> get stores => List.unmodifiable(_stores);
@@ -30,13 +33,26 @@ class ShoppingPlannerController extends ChangeNotifier {
   }
 
   int getProductQuantity(String productId) {
-    return _quantities[productId] ?? 0;
+    if (!_products.any((p) => p.id == productId)) {
+      return 0;
+    }
+    return _quantities[productId] ?? 1;
   }
 
   int getStoreItemCount(String storeId) {
     int count = 0;
     for (final product in getProductsForStore(storeId)) {
       count += getProductQuantity(product.id);
+    }
+    return count;
+  }
+
+  int getStoreDistinctItemCount(String storeId) {
+    int count = 0;
+    for (final product in getProductsForStore(storeId)) {
+      if (getProductQuantity(product.id) > 0) {
+        count++;
+      }
     }
     return count;
   }
@@ -61,22 +77,22 @@ class ShoppingPlannerController extends ChangeNotifier {
 
   int getTotalPlannedCount() {
     int total = 0;
-    for (final qty in _quantities.values) {
-      total += qty;
+    for (final product in _products) {
+      total += getProductQuantity(product.id);
     }
     return total;
   }
 
   void incrementQuantity(Product product) {
-    final currentQty = _quantities[product.id] ?? 0;
+    final currentQty = getProductQuantity(product.id);
     _quantities[product.id] = currentQty + 1;
     notifyListeners();
   }
 
   void decrementQuantity(String productId) {
-    final currentQty = _quantities[productId] ?? 0;
+    final currentQty = getProductQuantity(productId);
     if (currentQty <= 1) {
-      _quantities.remove(productId);
+      _quantities[productId] = 0;
     } else {
       _quantities[productId] = currentQty - 1;
     }
@@ -85,7 +101,7 @@ class ShoppingPlannerController extends ChangeNotifier {
 
   void updateProductQuantity(String productId, int newQuantity) {
     if (newQuantity <= 0) {
-      _quantities.remove(productId);
+      _quantities[productId] = 0;
     } else {
       _quantities[productId] = newQuantity;
     }
@@ -138,13 +154,14 @@ class ShoppingPlannerController extends ChangeNotifier {
 
   void addProduct(Product product) {
     _products.insert(0, product);
+    _quantities[product.id] = 1;
     notifyListeners();
   }
 
   void clearStoreItems(String storeId) {
     final storeProducts = getProductsForStore(storeId);
     for (final p in storeProducts) {
-      _quantities.remove(p.id);
+      _quantities[p.id] = 0;
     }
     notifyListeners();
   }

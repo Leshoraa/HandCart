@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_dimens.dart';
 import '../../../../core/constants/app_strings.dart';
-import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/date_formatter.dart';
+import '../../../../core/widgets/empty_state_view.dart';
+import '../../../../core/widgets/google_settings_sheet.dart';
 import '../../../shopping_list/presentation/pages/store_product_list_page.dart';
 import '../../../shopping_list/state/shopping_planner_controller.dart';
 import '../../../shopping_list/state/shopping_planner_scope.dart';
 import '../../data/models/store_model.dart';
 import '../widgets/add_store_bottom_sheet.dart';
+import '../widgets/category_filter_bar.dart';
 import '../widgets/store_card.dart';
 
 class StoreListPage extends StatefulWidget {
@@ -119,15 +121,34 @@ class _StoreListPageState extends State<StoreListPage> {
     }
   }
 
+  Widget _buildStoreCard(ShoppingPlannerController planner, Store store) {
+    final itemCount = planner.getStoreItemCount(store.id);
+    final totalPrice = planner.getStoreTotalPrice(store.id);
+    return StoreCard(
+      store: store,
+      itemCount: itemCount,
+      totalPrice: totalPrice,
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => StoreProductListPage(store: store),
+          ),
+        );
+      },
+      onPin: () => _handleTogglePin(planner, store),
+      onEdit: () => _handleEditStore(planner, store),
+      onDelete: () => _handleDeleteStore(planner, store),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final planner = ShoppingPlannerScope.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDark = colorScheme.brightness == Brightness.dark;
-    final totalExpenseAll = planner.getTotalPlannedExpense();
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final totalCountAll = planner.getTotalPlannedCount();
 
-    // Extract unique store categories
     final categories = [
       AppStrings.allStores,
       ...planner.stores.map((s) => s.category).toSet(),
@@ -143,7 +164,6 @@ class _StoreListPageState extends State<StoreListPage> {
       return matchesCategory && matchesSearch;
     }).toList();
 
-    // Group stores by date
     final Map<DateTime, List<Store>> groupedStores = {};
     for (final store in filteredStores) {
       final dayKey =
@@ -163,8 +183,36 @@ class _StoreListPageState extends State<StoreListPage> {
       key: _scaffoldKey,
       backgroundColor: colorScheme.surface,
       drawer: NavigationDrawer(
-        backgroundColor: colorScheme.surfaceContainerLow,
+        backgroundColor: colorScheme.surface,
         indicatorColor: colorScheme.primaryContainer,
+        selectedIndex: _selectedCategory == AppStrings.allStores
+            ? 0
+            : (categories.skip(1).contains(_selectedCategory)
+                ? 2 + categories.skip(1).toList().indexOf(_selectedCategory)
+                : 0),
+        onDestinationSelected: (idx) {
+          final categoryCount = categories.length - 1;
+          if (idx == 0) {
+            _onCategorySelected(AppStrings.allStores);
+            Navigator.pop(context);
+          } else if (idx == 1) {
+            Navigator.pop(context);
+          } else if (idx >= 2 && idx < 2 + categoryCount) {
+            final cat = categories.skip(1).elementAt(idx - 2);
+            _onCategorySelected(cat);
+            Navigator.pop(context);
+          } else if (idx == 2 + categoryCount) {
+            Navigator.pop(context);
+            GoogleSettingsSheet.show(context);
+          } else if (idx == 3 + categoryCount) {
+            Navigator.pop(context);
+            showLicensePage(
+              context: context,
+              applicationName: AppStrings.appName,
+              applicationVersion: '1.0.0',
+            );
+          }
+        },
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(28, 28, 16, 16),
@@ -192,8 +240,7 @@ class _StoreListPageState extends State<StoreListPage> {
                       children: [
                         Text(
                           AppStrings.appName,
-                          style: TextStyle(
-                            fontSize: 18,
+                          style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w800,
                             letterSpacing: -0.3,
                             color: colorScheme.onSurface,
@@ -201,8 +248,7 @@ class _StoreListPageState extends State<StoreListPage> {
                         ),
                         Text(
                           'Shopping Planner',
-                          style: TextStyle(
-                            fontSize: 12,
+                          style: theme.textTheme.bodySmall?.copyWith(
                             fontWeight: FontWeight.w600,
                             color: colorScheme.onSurfaceVariant,
                           ),
@@ -214,38 +260,26 @@ class _StoreListPageState extends State<StoreListPage> {
                 const SizedBox(height: 20),
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(14),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   decoration: BoxDecoration(
                     color: colorScheme.surfaceContainerHigh,
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
-                      Text(
-                        'Total Planned Budget',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
+                      Icon(
+                        Icons.checklist_rounded,
+                        size: 20,
+                        color: colorScheme.primary,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        CurrencyFormatter.format(totalExpenseAll),
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w900,
-                          color: colorScheme.primary,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '$totalCountAll items planned across ${planner.stores.length} stores',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                          color: colorScheme.onSurfaceVariant,
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          '$totalCountAll items planned • ${planner.stores.length} stores',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: colorScheme.onSurface,
+                          ),
                         ),
                       ),
                     ],
@@ -270,8 +304,7 @@ class _StoreListPageState extends State<StoreListPage> {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             child: Text(
               'CATEGORIES',
-              style: TextStyle(
-                fontSize: 11,
+              style: theme.textTheme.labelSmall?.copyWith(
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.8,
                 color: colorScheme.onSurfaceVariant,
@@ -285,6 +318,17 @@ class _StoreListPageState extends State<StoreListPage> {
               label: Text(cat),
             ),
           ),
+          const Divider(indent: 20, endIndent: 20),
+          const NavigationDrawerDestination(
+            icon: Icon(Icons.settings_outlined),
+            selectedIcon: Icon(Icons.settings_rounded),
+            label: Text('Settings'),
+          ),
+          const NavigationDrawerDestination(
+            icon: Icon(Icons.help_outline_rounded),
+            selectedIcon: Icon(Icons.help_rounded),
+            label: Text('Help & feedback'),
+          ),
         ],
       ),
       appBar: AppBar(
@@ -292,360 +336,242 @@ class _StoreListPageState extends State<StoreListPage> {
           icon: const Icon(Icons.menu_rounded),
           onPressed: () => _scaffoldKey.currentState?.openDrawer(),
         ),
-        centerTitle: true,
         title: Text(
           AppStrings.appName,
-          style: TextStyle(
-            fontWeight: FontWeight.w700,
-            fontSize: 18,
-            letterSpacing: -0.2,
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.5,
             color: colorScheme.onSurface,
           ),
         ),
+        centerTitle: false,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.help_outline_rounded),
+            tooltip: 'Help & feedback',
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('HandCart - Modern Material You Shopping Planner'),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            },
+          ),
           Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHigh,
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Icon(
-                  Icons.category_rounded,
-                  size: 18,
-                  color: colorScheme.onSurfaceVariant,
+            padding: const EdgeInsets.only(right: 12.0),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(20),
+              onTap: () => GoogleSettingsSheet.show(context),
+              child: Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: colorScheme.primaryContainer,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.person_rounded,
+                    size: 20,
+                    color: colorScheme.onPrimaryContainer,
+                  ),
                 ),
               ),
             ),
           ),
         ],
       ),
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              // Search Bar at Top (Matching Image 2)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppDimens.md,
-                  AppDimens.sm,
-                  AppDimens.md,
-                  AppDimens.md,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppDimens.md,
+                AppDimens.xs,
+                AppDimens.md,
+                AppDimens.md,
+              ),
+              child: SearchBar(
+                controller: _searchController,
+                hintText: AppStrings.searchStoresHint,
+                elevation: const WidgetStatePropertyAll(0),
+                backgroundColor:
+                    WidgetStatePropertyAll(colorScheme.surfaceContainerHigh),
+                shape: const WidgetStatePropertyAll(StadiumBorder()),
+                padding: const WidgetStatePropertyAll(
+                  EdgeInsets.symmetric(horizontal: 16.0),
                 ),
-                child: SearchBar(
-                  controller: _searchController,
-                  hintText: AppStrings.searchStoresHint,
-                  elevation: const WidgetStatePropertyAll(0),
-                  backgroundColor:
-                      WidgetStatePropertyAll(colorScheme.surfaceContainerHigh),
-                  shape: const WidgetStatePropertyAll(StadiumBorder()),
-                  padding: const WidgetStatePropertyAll(
-                    EdgeInsets.symmetric(horizontal: 16.0),
-                  ),
-                  leading: _searchQuery.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.arrow_back_rounded),
-                          onPressed: () {
-                            _searchController.clear();
-                            setState(() {
-                              _searchQuery = '';
-                            });
-                          },
-                        )
-                      : Icon(
-                          Icons.search_rounded,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                  trailing: [
-                    if (_searchQuery.isNotEmpty)
-                      IconButton(
-                        icon: const Icon(Icons.close_rounded),
+                leading: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.arrow_back_rounded),
                         onPressed: () {
                           _searchController.clear();
                           setState(() {
                             _searchQuery = '';
                           });
                         },
+                      )
+                    : Icon(
+                        Icons.search_rounded,
+                        color: colorScheme.onSurfaceVariant,
                       ),
+                trailing: [
+                  if (_searchQuery.isNotEmpty)
                     IconButton(
-                      icon: const Icon(Icons.mic_rounded),
-                      onPressed: () {},
+                      icon: const Icon(Icons.close_rounded),
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() {
+                          _searchQuery = '';
+                        });
+                      },
                     ),
-                  ],
-                  onChanged: _onSearchChanged,
-                ),
+                  IconButton(
+                    icon: const Icon(Icons.mic_rounded),
+                    onPressed: () {},
+                  ),
+                ],
+                onChanged: _onSearchChanged,
               ),
+            ),
 
-              // Scrollable Page Content (Chips, Section Header, Cards Grid)
-              Expanded(
-                child: CustomScrollView(
-                  slivers: [
-                    // Horizontal Category Filter Chips with Animated Morphing Capsule
-                    SliverToBoxAdapter(
-                      child: SizedBox(
-                        height: 42,
-                        child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppDimens.md,
-                          ),
-                          itemCount: categories.length,
-                          separatorBuilder: (context, index) =>
-                              const SizedBox(width: AppDimens.sm),
-                          itemBuilder: (context, index) {
-                            final category = categories[index];
-                            final isSelected = category == _selectedCategory;
-                            return Center(
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 250),
-                                curve: Curves.easeInOutCubicEmphasized,
-                                height: 32.0,
-                                decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? colorScheme.primaryContainer
-                                      : (isDark
-                                          ? colorScheme.surfaceContainerHigh
-                                          : Colors.white),
-                                  borderRadius: BorderRadius.circular(
-                                    isSelected ? 16.0 : 10.0,
-                                  ),
-                                  border: Border.all(
-                                    color: isSelected
-                                        ? Colors.transparent
-                                        : colorScheme.outlineVariant
-                                            .withValues(alpha: 0.8),
-                                    width: 1.0,
-                                  ),
-                                ),
-                                child: Material(
-                                  color: Colors.transparent,
-                                  child: InkWell(
-                                    borderRadius: BorderRadius.circular(
-                                      isSelected ? 16.0 : 10.0,
-                                    ),
-                                    onTap: () => _onCategorySelected(category),
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12.0,
-                                      ),
-                                      child: Center(
-                                        child: AnimatedDefaultTextStyle(
-                                          duration:
-                                              const Duration(milliseconds: 200),
-                                          style: TextStyle(
-                                            fontSize: 13.0,
-                                            fontWeight: isSelected
-                                                ? FontWeight.w700
-                                                : FontWeight.w600,
-                                            color: isSelected
-                                                ? colorScheme.onPrimaryContainer
-                                                : colorScheme.onSurfaceVariant,
-                                          ),
-                                          child: Text(category),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
+            Expanded(
+              child: CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: CategoryFilterBar(
+                      categories: categories,
+                      selectedCategory: _selectedCategory,
+                      onCategorySelected: _onCategorySelected,
                     ),
+                  ),
 
-                    // Date Grouped Store Sections (No "Shopping Places" text!)
-                    if (filteredStores.isEmpty)
-                      SliverFillRemaining(
-                        hasScrollBody: false,
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                  if (filteredStores.isEmpty)
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: EmptyStateView(
+                        icon: Icons.storefront_outlined,
+                        title: AppStrings.noStoresFound,
+                        message: _searchQuery.isNotEmpty
+                            ? 'No stores match "$_searchQuery". Try clearing your search.'
+                            : 'No stores in this category yet. Tap Add Store to create one.',
+                        buttonLabel: _searchQuery.isNotEmpty ? 'Clear Search' : null,
+                        onButtonPressed: _searchQuery.isNotEmpty
+                            ? () {
+                                _searchController.clear();
+                                setState(() {
+                                  _searchQuery = '';
+                                });
+                              }
+                            : null,
+                      ),
+                    )
+                  else
+                    for (final date in sortedDates) ...[
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            AppDimens.md,
+                            AppDimens.lg,
+                            AppDimens.md,
+                            AppDimens.sm,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Icon(
-                                Icons.storefront_outlined,
-                                size: 64,
-                                color: colorScheme.onSurfaceVariant
-                                    .withValues(alpha: 0.5),
-                              ),
-                              const SizedBox(height: 12),
                               Text(
-                                'No matching stores found',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
+                                DateFormatter.formatRelativeDate(date),
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
                                   color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: colorScheme.secondaryContainer,
+                                  borderRadius: BorderRadius.circular(
+                                      AppDimens.radiusFull),
+                                ),
+                                child: Text(
+                                  '${groupedStores[date]!.length} ${groupedStores[date]!.length == 1 ? "store" : "stores"}',
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: colorScheme.onSecondaryContainer,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
                         ),
-                      )
-                    else
-                      for (final date in sortedDates) ...[
-                        // Date Section Header
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(
-                              AppDimens.md,
-                              AppDimens.lg,
-                              AppDimens.md,
-                              AppDimens.sm + 4,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Text(
-                                  DateFormatter.formatRelativeDate(date),
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: -0.3,
-                                    color: colorScheme.onSurface,
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: colorScheme.surfaceContainerHigh,
-                                    borderRadius: BorderRadius.circular(
-                                        AppDimens.radiusFull),
-                                  ),
-                                  child: Text(
-                                    '${groupedStores[date]!.length} ${groupedStores[date]!.length == 1 ? "store" : "stores"}',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      color: colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                      ),
 
-                        // Store Cards 2-Column Grid for this date
-                        SliverPadding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppDimens.md,
-                          ),
-                          sliver: SliverGrid(
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 12.0,
-                              mainAxisSpacing: 12.0,
-                              mainAxisExtent: 254.0,
-                            ),
-                            delegate: SliverChildBuilderDelegate(
-                              (context, index) {
-                                final store = groupedStores[date]![index];
-                                final itemCount =
-                                    planner.getStoreItemCount(store.id);
-                                final totalPrice =
-                                    planner.getStoreTotalPrice(store.id);
-                                return StoreCard(
-                                  store: store,
-                                  itemCount: itemCount,
-                                  totalPrice: totalPrice,
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) =>
-                                            StoreProductListPage(store: store),
+                      SliverPadding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppDimens.md,
+                        ),
+                        sliver: SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (context, rowIndex) {
+                              final dateStores = groupedStores[date]!;
+                              final rowCount = (dateStores.length + 1) ~/ 2;
+                              final firstIndex = rowIndex * 2;
+                              final secondIndex = firstIndex + 1;
+                              final store1 = dateStores[firstIndex];
+                              final store2 = secondIndex < dateStores.length
+                                  ? dateStores[secondIndex]
+                                  : null;
+
+                              return Padding(
+                                padding: EdgeInsets.only(
+                                  bottom: rowIndex < rowCount - 1
+                                      ? 12.0
+                                      : 0.0,
+                                ),
+                                child: IntrinsicHeight(
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      Expanded(
+                                        child: _buildStoreCard(
+                                          planner,
+                                          store1,
+                                        ),
                                       ),
-                                    );
-                                  },
-                                  onPin: () =>
-                                      _handleTogglePin(planner, store),
-                                  onEdit: () =>
-                                      _handleEditStore(planner, store),
-                                  onDelete: () =>
-                                      _handleDeleteStore(planner, store),
-                                );
-                              },
-                              childCount: groupedStores[date]!.length,
-                            ),
+                                      const SizedBox(width: 12.0),
+                                      Expanded(
+                                        child: store2 != null
+                                            ? _buildStoreCard(
+                                                planner,
+                                                store2,
+                                              )
+                                            : const SizedBox.shrink(),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                            childCount: (groupedStores[date]!.length + 1) ~/ 2,
                           ),
                         ),
-                      ],
+                      ),
+                    ],
 
-                    const SliverToBoxAdapter(
-                      child: SizedBox(height: AppDimens.xl * 3),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-
-          // Floating Search Suggestions Dropdown (Image 1) - Floats over content with elevation, does NOT shift layout!
-          if (_searchQuery.isNotEmpty && filteredStores.isNotEmpty)
-            Positioned(
-              top: 68.0,
-              left: AppDimens.md,
-              right: AppDimens.md,
-              child: Material(
-                elevation: 6,
-                shadowColor: Colors.black.withValues(alpha: 0.25),
-                borderRadius: BorderRadius.circular(20.0),
-                color: colorScheme.surfaceContainerHigh,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: filteredStores.take(3).map((store) {
-                      return ListTile(
-                        leading: Icon(
-                          Icons.category_rounded,
-                          color: colorScheme.onSurfaceVariant
-                              .withValues(alpha: 0.5),
-                          size: 26,
-                        ),
-                        title: Text(
-                          store.name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 14,
-                          ),
-                        ),
-                        subtitle: Text(
-                          store.description,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                        onTap: () {
-                          _searchController.clear();
-                          setState(() {
-                            _searchQuery = '';
-                          });
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => StoreProductListPage(store: store),
-                            ),
-                          );
-                        },
-                      );
-                    }).toList(),
+                  const SliverToBoxAdapter(
+                    child: SizedBox(height: AppDimens.xl * 3),
                   ),
-                ),
+                ],
               ),
             ),
-        ],
+          ],
+        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: FloatingActionButton.extended(
@@ -653,16 +579,17 @@ class _StoreListPageState extends State<StoreListPage> {
           context,
           onStoreAdded: planner.addStore,
         ),
-        elevation: 3,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.0),
-        ),
+        elevation: AppDimens.elevationNone,
+        shape: const StadiumBorder(),
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
         icon: const Icon(Icons.add_business_rounded),
-        label: const Text(
+        label: Text(
           AppStrings.addNewStore,
-          style: TextStyle(fontWeight: FontWeight.w800),
+          style: theme.textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: colorScheme.onPrimary,
+          ),
         ),
       ),
     );
