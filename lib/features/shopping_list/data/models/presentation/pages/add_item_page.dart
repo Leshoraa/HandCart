@@ -185,6 +185,19 @@ class _AddItemPageState extends State<AddItemPage> {
                       : null,
                 ),
                 const SizedBox(height: 14),
+                TextFormField(
+                  key: const ValueKey('add_item_description'),
+                  controller: _descriptionController,
+                  minLines: 2,
+                  maxLines: 4,
+                  textCapitalization: TextCapitalization.sentences,
+                  decoration: const InputDecoration(
+                    labelText: 'Description or note (optional)',
+                    prefixIcon: Icon(Icons.notes_rounded),
+                    alignLabelWithHint: true,
+                  ),
+                ),
+                const SizedBox(height: 14),
                 DropdownButtonFormField<String>(
                   key: const ValueKey('add_item_category'),
                   initialValue: _selectedCategory,
@@ -246,63 +259,6 @@ class _AddItemPageState extends State<AddItemPage> {
                     }
                     return null;
                   },
-                ),
-                const SizedBox(height: 14),
-                TextFormField(
-                  key: const ValueKey('add_item_description'),
-                  controller: _descriptionController,
-                  minLines: 2,
-                  maxLines: 4,
-                  textCapitalization: TextCapitalization.sentences,
-                  decoration: const InputDecoration(
-                    labelText: 'Description or note (optional)',
-                    prefixIcon: Icon(Icons.notes_rounded),
-                    alignLabelWithHint: true,
-                  ),
-                ),
-                const SizedBox(height: 18),
-                Row(
-                  children: [
-                    OutlinedButton.icon(
-                      onPressed: _isCapturingImage || _isSaving
-                          ? null
-                          : _takePhoto,
-                      icon: _isCapturingImage
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.camera_alt_outlined),
-                      label: Text(
-                        _imagePath == null ? 'Take photo' : 'Retake photo',
-                      ),
-                    ),
-                    const Spacer(),
-                    Container(
-                      width: 76,
-                      height: 76,
-                      decoration: BoxDecoration(
-                        color: colorScheme.surfaceContainerHigh,
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: _imagePath == null
-                          ? Icon(
-                              Icons.image_outlined,
-                              color: colorScheme.onSurfaceVariant,
-                            )
-                          : Image.file(
-                              File(_imagePath!),
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  Icon(
-                                    Icons.broken_image_outlined,
-                                    color: colorScheme.onSurfaceVariant,
-                                  ),
-                            ),
-                    ),
-                  ],
                 ),
                 const SizedBox(height: 24),
                 SizedBox(
