@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+import '../../../../../../core/constants/app_dimens.dart';
 import '../../../../../../core/constants/app_strings.dart';
 import '../../../../state/shopping_planner_scope.dart';
 import '../../../../services/product_image_service.dart';
@@ -170,7 +171,9 @@ class _AddItemPageState extends State<AddItemPage> {
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
+                _buildCameraPreview(context),
+                const SizedBox(height: 16),
                 TextFormField(
                   key: const ValueKey('add_item_name'),
                   controller: _nameController,
@@ -188,11 +191,11 @@ class _AddItemPageState extends State<AddItemPage> {
                 TextFormField(
                   key: const ValueKey('add_item_description'),
                   controller: _descriptionController,
-                  minLines: 2,
-                  maxLines: 4,
+                  minLines: 4,
+                  maxLines: 6,
                   textCapitalization: TextCapitalization.sentences,
                   decoration: const InputDecoration(
-                    labelText: 'Description or note (optional)',
+                    labelText: 'Description (optional)',
                     prefixIcon: Icon(Icons.notes_rounded),
                     alignLabelWithHint: true,
                   ),
@@ -286,4 +289,299 @@ class _AddItemPageState extends State<AddItemPage> {
       ),
     );
   }
+
+  Widget _buildCameraPreview(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 480),
+        child: AspectRatio(
+          aspectRatio: 4 / 3,
+          child: Material(
+            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppDimens.radiusLg),
+              side: BorderSide(
+                color: colorScheme.outlineVariant.withValues(alpha: 0.8),
+                width: 1.5,
+              ),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              key: const ValueKey('add_item_camera_preview'),
+              onTap: _isCapturingImage || _isSaving ? null : _takePhoto,
+              child: _imagePath != null
+                  ? _buildCapturedImagePreview(colorScheme, theme)
+                  : _buildPlaceholderPreview(colorScheme, theme),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlaceholderPreview(ColorScheme colorScheme, ThemeData theme) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        CustomPaint(
+          size: Size.infinite,
+          painter: _CameraViewfinderPainter(
+            color: colorScheme.outline.withValues(alpha: 0.35),
+          ),
+        ),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: colorScheme.primaryContainer,
+                shape: BoxShape.circle,
+              ),
+              child: _isCapturingImage
+                  ? SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: colorScheme.onPrimaryContainer,
+                      ),
+                    )
+                  : Icon(
+                      Icons.camera_alt_rounded,
+                      size: 32,
+                      color: colorScheme.onPrimaryContainer,
+                    ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              _isCapturingImage ? 'Opening camera...' : 'Camera Preview',
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Tap to capture product photo',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+        Positioned(
+          top: 12,
+          right: 12,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.8),
+              borderRadius: BorderRadius.circular(AppDimens.radiusSm),
+              border: Border.all(
+                color: colorScheme.outlineVariant,
+                width: 1,
+              ),
+            ),
+            child: Text(
+              '4:3',
+              style: theme.textTheme.labelSmall?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: colorScheme.onSurfaceVariant,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCapturedImagePreview(ColorScheme colorScheme, ThemeData theme) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Image.file(
+          File(_imagePath!),
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => Container(
+            color: colorScheme.surfaceContainerHighest,
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.broken_image_rounded,
+                    size: 40,
+                    color: colorScheme.error,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Failed to load captured photo',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.error,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 64,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black.withValues(alpha: 0.55),
+                  Colors.transparent,
+                ],
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          top: 12,
+          left: 12,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.black54,
+              borderRadius: BorderRadius.circular(AppDimens.radiusSm),
+            ),
+            child: const Text(
+              '4:3',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          top: 8,
+          right: 8,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton.filledTonal(
+                key: const ValueKey('add_item_retake_photo'),
+                tooltip: 'Retake photo',
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.black54,
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: _isCapturingImage || _isSaving ? null : _takePhoto,
+                icon: _isCapturingImage
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Icon(Icons.refresh_rounded, size: 20),
+              ),
+              const SizedBox(width: 6),
+              IconButton.filledTonal(
+                key: const ValueKey('add_item_remove_photo'),
+                tooltip: 'Remove photo',
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.black54,
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: _isSaving
+                    ? null
+                    : () {
+                        setState(() => _imagePath = null);
+                      },
+                icon: const Icon(Icons.close_rounded, size: 20),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CameraViewfinderPainter extends CustomPainter {
+  const _CameraViewfinderPainter({required this.color});
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 2.0
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    const cornerLength = 16.0;
+    const padding = 20.0;
+
+    // Top-left
+    canvas.drawLine(
+      const Offset(padding, padding + cornerLength),
+      const Offset(padding, padding),
+      paint,
+    );
+    canvas.drawLine(
+      const Offset(padding, padding),
+      const Offset(padding + cornerLength, padding),
+      paint,
+    );
+
+    // Top-right
+    canvas.drawLine(
+      Offset(size.width - padding - cornerLength, padding),
+      Offset(size.width - padding, padding),
+      paint,
+    );
+    canvas.drawLine(
+      Offset(size.width - padding, padding),
+      Offset(size.width - padding, padding + cornerLength),
+      paint,
+    );
+
+    // Bottom-left
+    canvas.drawLine(
+      Offset(padding, size.height - padding - cornerLength),
+      Offset(padding, size.height - padding),
+      paint,
+    );
+    canvas.drawLine(
+      Offset(padding, size.height - padding),
+      Offset(padding + cornerLength, size.height - padding),
+      paint,
+    );
+
+    // Bottom-right
+    canvas.drawLine(
+      Offset(size.width - padding - cornerLength, size.height - padding),
+      Offset(size.width - padding, size.height - padding),
+      paint,
+    );
+    canvas.drawLine(
+      Offset(size.width - padding, size.height - padding),
+      Offset(size.width - padding, size.height - padding - cornerLength),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _CameraViewfinderPainter oldDelegate) =>
+      oldDelegate.color != color;
 }

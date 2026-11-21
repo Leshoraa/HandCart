@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:handcart/features/shopping_list/data/models/presentation/pages/add_item_page.dart';
 import 'package:handcart/features/shopping_list/data/models/presentation/pages/store_product_list_page.dart';
 import 'package:handcart/features/shopping_list/services/product_image_service.dart';
@@ -212,4 +215,88 @@ void main() {
       previousImagePath,
     );
   });
+
+  testWidgets(
+    'AddItemPage renders 4:3 camera preview above item name and captures/removes photo',
+    (tester) async {
+      final controller = createInMemoryPlannerController();
+      addTearDown(controller.dispose);
+      await controller.initialize();
+      final store = controller.stores.first;
+
+      final tempDir = await Directory.systemTemp.createTemp('handcart_test_');
+      addTearDown(() async {
+        if (await tempDir.exists()) await tempDir.delete(recursive: true);
+      });
+      final fakeImageFile = File('${tempDir.path}/fake_camera.jpg');
+      await fakeImageFile.writeAsBytes([0xFF, 0xD8, 0xFF]);
+
+      var captureCallCount = 0;
+      final imageService = ProductImageService(
+        captureImage: () async {
+          captureCallCount++;
+          return XFile(fakeImageFile.path);
+        },
+        retrieveLostImage: () async => null,
+        documentsDirectory: () async => tempDir,
+      );
+
+      await tester.pumpWidget(
+        ShoppingPlannerScope(
+          controller: controller,
+          child: MaterialApp(
+            home: AddItemPage(
+              storeId: store.id,
+              storeName: store.name,
+              storeCategory: store.category,
+              imageService: imageService,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Verify camera preview widget is present
+      final cameraPreview = find.byKey(
+        const ValueKey('add_item_camera_preview'),
+      );
+      expect(cameraPreview, findsOneWidget);
+      expect(find.text('Camera Preview'), findsOneWidget);
+      expect(find.text('4:3'), findsOneWidget);
+
+      // Verify camera preview is positioned strictly above item name field
+      final previewRect = tester.getRect(cameraPreview);
+      final nameRect = tester.getRect(
+        find.byKey(const ValueKey('add_item_name')),
+      );
+      expect(previewRect.bottom, lessThan(nameRect.top));
+
+      // Verify exact 4:3 aspect ratio
+      expect(previewRect.width / previewRect.height, closeTo(4.0 / 3.0, 0.05));
+
+      // Tap to capture photo
+      await tester.tap(cameraPreview);
+      await tester.pumpAndSettle();
+      expect(captureCallCount, 1);
+
+      // Verify photo preview is now showing with retake and remove buttons
+      expect(
+        find.byKey(const ValueKey('add_item_retake_photo')),
+        findsOneWidget,
+      );
+      final removeBtn = find.byKey(const ValueKey('add_item_remove_photo'));
+      expect(removeBtn, findsOneWidget);
+
+      // Tap remove photo button to clear the image
+      await tester.tap(removeBtn);
+      await tester.pumpAndSettle();
+
+      // Should return back to placeholder state
+      expect(find.text('Camera Preview'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('add_item_retake_photo')),
+        findsNothing,
+      );
+    },
+  );
 }
