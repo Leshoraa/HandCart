@@ -1,14 +1,19 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_dimens.dart';
-import '../../../../core/constants/app_strings.dart';
-import '../../../../core/utils/currency_formatter.dart';
-import '../../data/models/product_model.dart';
+
+import '../../../../../../core/constants/app_dimens.dart';
+import '../../../../../../core/constants/app_strings.dart';
+import '../../../../../../core/utils/currency_formatter.dart';
+import '../../product_model.dart';
 
 class ShoppingProductTile extends StatelessWidget {
   final Product product;
   final int quantity;
   final VoidCallback onIncrement;
   final VoidCallback onDecrement;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
   final bool isFirst;
   final bool isLast;
 
@@ -18,6 +23,8 @@ class ShoppingProductTile extends StatelessWidget {
     required this.quantity,
     required this.onIncrement,
     required this.onDecrement,
+    required this.onEdit,
+    required this.onDelete,
     this.isFirst = false,
     this.isLast = false,
   });
@@ -30,6 +37,48 @@ class ShoppingProductTile extends StatelessWidget {
       if (amount % 1 == 0) return amount.toInt().toString();
       return amount.toStringAsFixed(2);
     }
+  }
+
+  Widget _buildFallbackImage(ColorScheme colorScheme) {
+    return Center(
+      child: Icon(product.icon, size: 32, color: colorScheme.primary),
+    );
+  }
+
+  Widget _buildNetworkImage(ColorScheme colorScheme) {
+    final imageUrl = product.imageUrl;
+    if (imageUrl == null) return _buildFallbackImage(colorScheme);
+
+    return Image.network(
+      imageUrl,
+      fit: BoxFit.cover,
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return Center(
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            value: loadingProgress.expectedTotalBytes != null
+                ? loadingProgress.cumulativeBytesLoaded /
+                      loadingProgress.expectedTotalBytes!
+                : null,
+          ),
+        );
+      },
+      errorBuilder: (context, error, stackTrace) =>
+          _buildFallbackImage(colorScheme),
+    );
+  }
+
+  Widget _buildProductImage(ColorScheme colorScheme) {
+    final imagePath = product.imagePath;
+    if (imagePath == null) return _buildNetworkImage(colorScheme);
+
+    return Image.file(
+      File(imagePath),
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) =>
+          _buildNetworkImage(colorScheme),
+    );
   }
 
   @override
@@ -74,42 +123,10 @@ class ShoppingProductTile extends StatelessWidget {
                   child: Container(
                     width: 72,
                     height: 72,
-                    color:
-                        colorScheme.surfaceContainerHigh.withValues(alpha: 0.5),
-                    child: product.imageUrl != null
-                        ? Image.network(
-                            product.imageUrl!,
-                            fit: BoxFit.cover,
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return Center(
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  value: loadingProgress.expectedTotalBytes !=
-                                          null
-                                      ? loadingProgress
-                                              .cumulativeBytesLoaded /
-                                          loadingProgress.expectedTotalBytes!
-                                      : null,
-                                ),
-                              );
-                            },
-                            errorBuilder: (context, error, stackTrace) =>
-                                Center(
-                              child: Icon(
-                                product.icon,
-                                size: 32,
-                                color: colorScheme.primary,
-                              ),
-                            ),
-                          )
-                        : Center(
-                            child: Icon(
-                              product.icon,
-                              size: 32,
-                              color: colorScheme.primary,
-                            ),
-                          ),
+                    color: colorScheme.surfaceContainerHigh.withValues(
+                      alpha: 0.5,
+                    ),
+                    child: _buildProductImage(colorScheme),
                   ),
                 ),
 
@@ -163,10 +180,7 @@ class ShoppingProductTile extends StatelessWidget {
                   OutlinedButton(
                     style: OutlinedButton.styleFrom(
                       foregroundColor: colorScheme.primary,
-                      side: BorderSide(
-                        color: colorScheme.primary,
-                        width: 1.5,
-                      ),
+                      side: BorderSide(color: colorScheme.primary, width: 1.5),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 14.0,
                         vertical: 6.0,
@@ -199,8 +213,7 @@ class ShoppingProductTile extends StatelessWidget {
                     height: 36,
                     decoration: BoxDecoration(
                       color: Colors.transparent,
-                      borderRadius:
-                          BorderRadius.circular(AppDimens.radiusFull),
+                      borderRadius: BorderRadius.circular(AppDimens.radiusFull),
                       border: Border.all(
                         color: colorScheme.primary,
                         width: 1.5,
@@ -242,6 +255,21 @@ class ShoppingProductTile extends StatelessWidget {
                       ],
                     ),
                   ),
+                PopupMenuButton<String>(
+                  tooltip: 'Product options',
+                  onSelected: (value) {
+                    switch (value) {
+                      case 'edit':
+                        onEdit();
+                      case 'delete':
+                        onDelete();
+                    }
+                  },
+                  itemBuilder: (context) => const [
+                    PopupMenuItem(value: 'edit', child: Text('Edit Item')),
+                    PopupMenuItem(value: 'delete', child: Text('Delete Item')),
+                  ],
+                ),
               ],
             ),
           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../../core/constants/app_dimens.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../data/models/store_model.dart';
@@ -18,8 +19,8 @@ class _CategoryPreset {
 }
 
 class AddStoreBottomSheet extends StatefulWidget {
-  final ValueChanged<Store>? onStoreAdded;
-  final ValueChanged<Store>? onStoreUpdated;
+  final Future<void> Function(Store)? onStoreAdded;
+  final Future<void> Function(Store)? onStoreUpdated;
   final Store? storeToEdit;
 
   const AddStoreBottomSheet({
@@ -31,8 +32,8 @@ class AddStoreBottomSheet extends StatefulWidget {
 
   static Future<void> show(
     BuildContext context, {
-    ValueChanged<Store>? onStoreAdded,
-    ValueChanged<Store>? onStoreUpdated,
+    Future<void> Function(Store)? onStoreAdded,
+    Future<void> Function(Store)? onStoreUpdated,
     Store? storeToEdit,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -63,49 +64,49 @@ class _AddStoreBottomSheetState extends State<AddStoreBottomSheet> {
   late String _selectedCategory;
   late String _selectedImageUrl;
   late IconData _selectedIcon;
+  bool _isSaving = false;
 
   static const List<_CategoryPreset> _categoryPresets = [
     _CategoryPreset(
       name: 'Supermarket',
       icon: Icons.local_grocery_store_rounded,
-      defaultImageUrl:
-          'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=600&auto=format&fit=crop&q=80',
+      defaultImageUrl: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=600&auto=format&fit=crop&q=80',
       defaultDescription: 'Daily fresh produce, dairy & pantry essentials',
     ),
     _CategoryPreset(
       name: 'Bakery',
       icon: Icons.bakery_dining_rounded,
-      defaultImageUrl:
-          'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&auto=format&fit=crop&q=80',
-      defaultDescription: 'Handcrafted sourdough, golden croissants & baked goods',
+      defaultImageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&auto=format&fit=crop&q=80',
+      defaultDescription:
+          'Handcrafted sourdough, golden croissants & baked goods',
     ),
     _CategoryPreset(
       name: 'Organic Store',
       icon: Icons.eco_rounded,
-      defaultImageUrl:
-          'https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&auto=format&fit=crop&q=80',
-      defaultDescription: 'Clean pantry essentials, superfoods & healthy snacks',
+      defaultImageUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&auto=format&fit=crop&q=80',
+      defaultDescription:
+          'Clean pantry essentials, superfoods & healthy snacks',
     ),
     _CategoryPreset(
       name: 'Convenience',
       icon: Icons.storefront_rounded,
-      defaultImageUrl:
-          'https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=600&auto=format&fit=crop&q=80',
-      defaultDescription: 'Quick refreshments, late-night snacks & household goods',
+      defaultImageUrl: 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=600&auto=format&fit=crop&q=80',
+      defaultDescription:
+          'Quick refreshments, late-night snacks & household goods',
     ),
     _CategoryPreset(
       name: 'Cafe & Coffee',
       icon: Icons.local_cafe_rounded,
-      defaultImageUrl:
-          'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=600&auto=format&fit=crop&q=80',
-      defaultDescription: 'Specialty coffee brews, light bites & fresh roast beans',
+      defaultImageUrl: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=600&auto=format&fit=crop&q=80',
+      defaultDescription:
+          'Specialty coffee brews, light bites & fresh roast beans',
     ),
     _CategoryPreset(
       name: 'Pharmacy',
       icon: Icons.medication_rounded,
-      defaultImageUrl:
-          'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=600&auto=format&fit=crop&q=80',
-      defaultDescription: 'Vitamins, healthcare items & personal wellness essentials',
+      defaultImageUrl: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=600&auto=format&fit=crop&q=80',
+      defaultDescription:
+          'Vitamins, healthcare items & personal wellness essentials',
     ),
   ];
 
@@ -125,8 +126,9 @@ class _AddStoreBottomSheetState extends State<AddStoreBottomSheet> {
     final editStore = widget.storeToEdit;
 
     _nameController = TextEditingController(text: editStore?.name ?? '');
-    _descriptionController =
-        TextEditingController(text: editStore?.description ?? '');
+    _descriptionController = TextEditingController(
+      text: editStore?.description ?? '',
+    );
 
     _selectedCategory = editStore?.category ?? _categoryPresets.first.name;
     _selectedIcon = editStore?.icon ?? _categoryPresets.first.icon;
@@ -159,7 +161,8 @@ class _AddStoreBottomSheetState extends State<AddStoreBottomSheet> {
     });
   }
 
-  void _submit() {
+  Future<void> _submit() async {
+    if (_isSaving) return;
     final name = _nameController.text.trim();
     final description = _descriptionController.text.trim();
 
@@ -177,29 +180,49 @@ class _AddStoreBottomSheetState extends State<AddStoreBottomSheet> {
         ? description
         : _getFallbackDescription(_selectedCategory);
 
-    if (widget.storeToEdit != null) {
-      final updatedStore = widget.storeToEdit!.copyWith(
-        name: name,
-        category: _selectedCategory,
-        description: finalDesc,
-        icon: _selectedIcon,
-        imageUrl: _selectedImageUrl,
-      );
-      widget.onStoreUpdated?.call(updatedStore);
-    } else {
-      final newStore = Store(
-        id: 'store_${DateTime.now().millisecondsSinceEpoch}',
-        name: name,
-        category: _selectedCategory,
-        description: finalDesc,
-        icon: _selectedIcon,
-        imageUrl: _selectedImageUrl,
-        createdAt: DateTime.now(),
-        note: '',
-      );
-      widget.onStoreAdded?.call(newStore);
+    setState(() {
+      _isSaving = true;
+    });
+
+    try {
+      if (widget.storeToEdit != null) {
+        final updatedStore = widget.storeToEdit!.copyWith(
+          name: name,
+          category: _selectedCategory,
+          description: finalDesc,
+          icon: _selectedIcon,
+          imageUrl: _selectedImageUrl,
+        );
+        await widget.onStoreUpdated?.call(updatedStore);
+      } else {
+        final newStore = Store(
+          id: 'store_${DateTime.now().millisecondsSinceEpoch}',
+          name: name,
+          category: _selectedCategory,
+          description: finalDesc,
+          icon: _selectedIcon,
+          imageUrl: _selectedImageUrl,
+          createdAt: DateTime.now(),
+          note: '',
+        );
+        await widget.onStoreAdded?.call(newStore);
+      }
+    } catch (error) {
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Unable to save store: $error'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
     }
 
+    if (!mounted) return;
     Navigator.pop(context);
   }
 
@@ -314,8 +337,9 @@ class _AddStoreBottomSheetState extends State<AddStoreBottomSheet> {
                         ),
                         decoration: BoxDecoration(
                           color: colorScheme.surface,
-                          borderRadius:
-                              BorderRadius.circular(AppDimens.radiusFull),
+                          borderRadius: BorderRadius.circular(
+                            AppDimens.radiusFull,
+                          ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -434,8 +458,9 @@ class _AddStoreBottomSheetState extends State<AddStoreBottomSheet> {
                     ),
                     label: Text(preset.name),
                     labelStyle: theme.textTheme.labelMedium?.copyWith(
-                      fontWeight:
-                          isSelected ? FontWeight.w700 : FontWeight.w600,
+                      fontWeight: isSelected
+                          ? FontWeight.w700
+                          : FontWeight.w600,
                       color: isSelected
                           ? colorScheme.onPrimary
                           : colorScheme.onSurfaceVariant,
@@ -443,8 +468,7 @@ class _AddStoreBottomSheetState extends State<AddStoreBottomSheet> {
                     backgroundColor: colorScheme.surface,
                     selectedColor: colorScheme.primary,
                     shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppDimens.radiusFull),
+                      borderRadius: BorderRadius.circular(AppDimens.radiusFull),
                     ),
                     side: BorderSide(
                       color: isSelected
@@ -506,19 +530,20 @@ class _AddStoreBottomSheetState extends State<AddStoreBottomSheet> {
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) =>
                                   Container(
-                                color: colorScheme.surfaceContainerHigh,
-                                child: Icon(
-                                  Icons.storefront_rounded,
-                                  size: 20,
-                                  color: colorScheme.onSurfaceVariant
-                                      .withValues(alpha: 0.5),
-                                ),
-                              ),
+                                    color: colorScheme.surfaceContainerHigh,
+                                    child: Icon(
+                                      Icons.storefront_rounded,
+                                      size: 20,
+                                      color: colorScheme.onSurfaceVariant
+                                          .withValues(alpha: 0.5),
+                                    ),
+                                  ),
                             ),
                             if (isSelected)
                               Container(
-                                color:
-                                    colorScheme.primary.withValues(alpha: 0.35),
+                                color: colorScheme.primary.withValues(
+                                  alpha: 0.35,
+                                ),
                                 child: const Center(
                                   child: Icon(
                                     Icons.check_rounded,
@@ -544,7 +569,8 @@ class _AddStoreBottomSheetState extends State<AddStoreBottomSheet> {
               textCapitalization: TextCapitalization.sentences,
               decoration: InputDecoration(
                 labelText: AppStrings.storeDescription,
-                hintText: 'e.g. Weekly family groceries, check dairy section...',
+                hintText:
+                    'e.g. Weekly family groceries, check dairy section...',
                 prefixIcon: Icon(
                   Icons.notes_rounded,
                   color: colorScheme.primary,
@@ -559,13 +585,22 @@ class _AddStoreBottomSheetState extends State<AddStoreBottomSheet> {
               width: double.infinity,
               height: 50,
               child: FilledButton.icon(
-                onPressed: _submit,
+                onPressed: _isSaving ? null : _submit,
                 style: FilledButton.styleFrom(
                   backgroundColor: colorScheme.primary,
                   foregroundColor: colorScheme.onPrimary,
                   shape: const StadiumBorder(),
                 ),
-                icon: const Icon(Icons.check_circle_rounded, size: 20),
+                icon: _isSaving
+                    ? SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: colorScheme.onPrimary,
+                        ),
+                      )
+                    : const Icon(Icons.check_circle_rounded, size: 20),
                 label: Text(
                   widget.storeToEdit != null
                       ? 'Save Changes'

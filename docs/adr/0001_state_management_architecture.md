@@ -16,11 +16,16 @@ We required a predictable, testable, and reactive state management architecture 
 We implemented `ShoppingPlannerController` extending Flutter's native `ChangeNotifier`, distributed across the widget hierarchy via `ShoppingPlannerScope` (`InheritedNotifier`).
 
 The controller encapsulates:
-- Store collection and active stores.
-- Store product catalogs.
-- In-memory product quantity mappings.
-- Per-store shopping notes and checklist memos.
+- Asynchronous loading of stores, products, and product quantities.
+- CRUD operations coordinated through `StoreRepository` and `ProductRepository`.
+- Per-store shopping notes and product quantity updates.
 - Dynamic computation of store item count, store total price, and overall planned expense.
+
+The repositories persist data through `AppDatabase` using SQLite (`sqflite`). The
+controller updates its in-memory state only after the corresponding repository
+operation succeeds. `ShoppingPlannerScope` remains the reactive UI boundary;
+SQLite and repositories provide persistence rather than replacing that state
+management design.
 
 ## Alternatives
 1. **Riverpod (`flutter_riverpod`)**:
@@ -30,9 +35,11 @@ The controller encapsulates:
 
 ## Consequences
 - **Positive**:
-  - Zero external state management dependencies.
-  - O(1) quantity lookups and clear unidirectional data flow.
-  - Decoupled business logic that is thoroughly tested via unit tests without needing widget bindings.
-  - Clean lifecycle management: controllers are disposed safely on application termination.
+  - No additional state management dependency.
+  - Persistent store, product, note, pin, and quantity data through SQLite.
+  - Repository-backed operations keep storage concerns out of presentation widgets.
+  - Controller behavior can be tested using repository fakes without native database bindings.
+  - Controllers are disposed with the application lifecycle.
 - **Negative / Trade-offs**:
-  - When persistent local database storage (e.g. SQLite / Hive) is integrated, the controller will need repository abstractions.
+  - Repository methods are asynchronous, so the UI must handle loading and storage errors.
+  - The current automated suite uses in-memory repository fakes for controller and widget tests; SQLite persistence across an Android process restart still requires device-level verification.

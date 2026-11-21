@@ -1,26 +1,72 @@
 import 'package:flutter/foundation.dart';
+
 import '../../stores/data/models/store_model.dart';
 import '../../stores/data/store_dummy_data.dart';
+import '../../stores/data/store_repository.dart';
 import '../data/models/product_model.dart';
+import '../data/product_repository.dart';
 
 class ShoppingPlannerController extends ChangeNotifier {
+  ShoppingPlannerController({
+    StoreRepository? storeRepository,
+    ProductRepository? productRepository,
+  }) : _storeRepository = storeRepository ?? StoreRepository(),
+       _productRepository = productRepository ?? ProductRepository();
+
+  final StoreRepository _storeRepository;
+  final ProductRepository _productRepository;
   final List<Store> _stores = [];
   final List<Product> _products = [];
   final Map<String, int> _quantities = {};
-  final Map<String, String> _storeNotes = {};
+  bool _isLoading = true;
+  bool _hasLoaded = false;
+  Future<void>? _loadingFuture;
+  Object? _loadError;
 
-  ShoppingPlannerController() {
-    _initData();
+  bool get isLoading => _isLoading;
+
+  Object? get loadError => _loadError;
+
+  Future<void> initialize() {
+    final activeLoad = _loadingFuture;
+    if (activeLoad != null) return activeLoad;
+    if (_hasLoaded) return Future<void>.value();
+
+    final loading = _loadData();
+    _loadingFuture = loading;
+    return loading;
   }
 
-  void _initData() {
-    _stores.addAll(StoreDummyData.initialStores);
-    _products.addAll(StoreDummyData.initialProducts);
-    for (final store in _stores) {
-      _storeNotes[store.id] = store.note;
-    }
-    for (final product in _products) {
-      _quantities[product.id] = 1;
+  Future<void> _loadData() async {
+    _isLoading = true;
+    _loadError = null;
+    notifyListeners();
+
+    try {
+      await _storeRepository.seedIfEmpty(
+        StoreDummyData.initialStores,
+        StoreDummyData.initialProducts,
+      );
+      final stores = await _storeRepository.getAll();
+      final products = await _productRepository.getAll();
+      final quantities = await _productRepository.getAllQuantities();
+
+      _stores
+        ..clear()
+        ..addAll(stores);
+      _products
+        ..clear()
+        ..addAll(products);
+      _quantities
+        ..clear()
+        ..addAll(quantities);
+      _hasLoaded = true;
+    } catch (error) {
+      _loadError = error;
+    } finally {
+      _isLoading = false;
+      _loadingFuture = null;
+      notifyListeners();
     }
   }
 
@@ -29,140 +75,164 @@ class ShoppingPlannerController extends ChangeNotifier {
   List<Product> get products => List.unmodifiable(_products);
 
   List<Product> getProductsForStore(String storeId) {
-    return _products.where((p) => p.storeId == storeId).toList();
+    return _products.where((product) => product.storeId == storeId).toList();
   }
 
   int getProductQuantity(String productId) {
-    if (!_products.any((p) => p.id == productId)) {
+    if (!_products.any((product) => product.id == productId)) {
       return 0;
     }
-    return _quantities[productId] ?? 1;
+    return _quantities[productId] ?? 0;
   }
 
   int getStoreItemCount(String storeId) {
-    int count = 0;
-    for (final product in getProductsForStore(storeId)) {
-      count += getProductQuantity(product.id);
-    }
-    return count;
+    return getProductsForStore(
+      storeId,
+    ).fold<int>(0, (count, product) => count + getProductQuantity(product.id));
   }
 
   int getStoreDistinctItemCount(String storeId) {
-    int count = 0;
-    for (final product in getProductsForStore(storeId)) {
-      if (getProductQuantity(product.id) > 0) {
-        count++;
-      }
-    }
-    return count;
+    return getProductsForStore(storeId)
+        .where((product) => getProductQuantity(product.id) > 0)
+        .length;
   }
 
   double getStoreTotalPrice(String storeId) {
-    double total = 0.0;
-    for (final product in getProductsForStore(storeId)) {
-      final qty = getProductQuantity(product.id);
-      total += product.price * qty;
-    }
-    return total;
+    return getProductsForStore(storeId).fold<double>(
+      0,
+      (total, product) =>
+          total + product.price * getProductQuantity(product.id),
+    );
   }
 
   double getTotalPlannedExpense() {
-    double total = 0.0;
-    for (final product in _products) {
-      final qty = getProductQuantity(product.id);
-      total += product.price * qty;
-    }
-    return total;
+    return _products.fold<double>(
+      0,
+      (total, product) =>
+          total + product.price * getProductQuantity(product.id),
+    );
   }
 
   int getTotalPlannedCount() {
-    int total = 0;
-    for (final product in _products) {
-      total += getProductQuantity(product.id);
-    }
-    return total;
+    return _products.fold<int>(
+      0,
+      (total, product) => total + getProductQuantity(product.id),
+    );
   }
 
-  void incrementQuantity(Product product) {
-    final currentQty = getProductQuantity(product.id);
-    _quantities[product.id] = currentQty + 1;
+  Future<void> incrementQuantity(Product product) async {
+    _requireProduct(product.id);
+    final quantity = await _productRepository.incrementQuantity(product.id);
+    _quantities[product.id] = quantity;
     notifyListeners();
   }
 
-  void decrementQuantity(String productId) {
-    final currentQty = getProductQuantity(productId);
-    if (currentQty <= 1) {
-      _quantities[productId] = 0;
-    } else {
-      _quantities[productId] = currentQty - 1;
-    }
+  Future<void> decrementQuantity(String productId) async {
+    _requireProduct(productId);
+    final quantity = await _productRepository.decrementQuantity(productId);
+    _quantities[productId] = quantity;
     notifyListeners();
   }
 
-  void updateProductQuantity(String productId, int newQuantity) {
-    if (newQuantity <= 0) {
-      _quantities[productId] = 0;
-    } else {
-      _quantities[productId] = newQuantity;
-    }
+  Future<void> updateProductQuantity(String productId, int newQuantity) async {
+    _requireProduct(productId);
+    final quantity = newQuantity <= 0 ? 0 : newQuantity;
+    await _productRepository.updateQuantity(productId, quantity);
+    _quantities[productId] = quantity;
     notifyListeners();
   }
 
   String getStoreNote(String storeId) {
-    return _storeNotes[storeId] ?? '';
+    return _requireStore(storeId).note;
   }
 
-  void updateStoreNote(String storeId, String note) {
-    _storeNotes[storeId] = note.trim();
-    notifyListeners();
+  Future<void> updateStoreNote(String storeId, String note) async {
+    final store = _requireStore(storeId);
+    await updateStore(store.copyWith(note: note.trim()));
   }
 
-  void addStore(Store store) {
+  Future<void> addStore(Store store) async {
+    await _storeRepository.insert(store);
     _stores.insert(0, store);
-    _storeNotes[store.id] = store.note;
     notifyListeners();
   }
 
-  void updateStore(Store updatedStore) {
-    final index = _stores.indexWhere((s) => s.id == updatedStore.id);
-    if (index != -1) {
-      _stores[index] = updatedStore;
-      _storeNotes[updatedStore.id] = updatedStore.note;
-      notifyListeners();
-    }
-  }
-
-  void togglePinStore(String storeId) {
-    final index = _stores.indexWhere((s) => s.id == storeId);
-    if (index != -1) {
-      final current = _stores[index];
-      _stores[index] = current.copyWith(isPinned: !current.isPinned);
-      notifyListeners();
-    }
-  }
-
-  void deleteStore(String storeId) {
-    _stores.removeWhere((s) => s.id == storeId);
-    _storeNotes.remove(storeId);
-    final storeProducts = getProductsForStore(storeId);
-    for (final p in storeProducts) {
-      _quantities.remove(p.id);
-    }
-    _products.removeWhere((p) => p.storeId == storeId);
+  Future<void> updateStore(Store updatedStore) async {
+    _requireStore(updatedStore.id);
+    await _storeRepository.update(updatedStore);
+    final index = _stores.indexWhere((store) => store.id == updatedStore.id);
+    _stores[index] = updatedStore;
     notifyListeners();
   }
 
-  void addProduct(Product product) {
+  Future<void> togglePinStore(String storeId) async {
+    final store = _requireStore(storeId);
+    await updateStore(store.copyWith(isPinned: !store.isPinned));
+  }
+
+  Future<void> deleteStore(String storeId) async {
+    _requireStore(storeId);
+    await _storeRepository.delete(storeId);
+
+    _stores.removeWhere((store) => store.id == storeId);
+    final removedProducts = _products
+        .where((product) => product.storeId == storeId)
+        .map((product) => product.id)
+        .toList();
+    _products.removeWhere((product) => product.storeId == storeId);
+    for (final productId in removedProducts) {
+      _quantities.remove(productId);
+    }
+    notifyListeners();
+  }
+
+  Future<void> addProduct(Product product, {int quantity = 1}) async {
+    if (quantity < 1) {
+      throw ArgumentError.value(quantity, 'quantity', 'Must be at least 1.');
+    }
+    await _productRepository.insert(product, quantity: quantity);
     _products.insert(0, product);
-    _quantities[product.id] = 1;
+    _quantities[product.id] = quantity;
     notifyListeners();
   }
 
-  void clearStoreItems(String storeId) {
-    final storeProducts = getProductsForStore(storeId);
-    for (final p in storeProducts) {
-      _quantities[p.id] = 0;
+  Future<void> updateProduct(Product updatedProduct) async {
+    _requireProduct(updatedProduct.id);
+    await _productRepository.update(updatedProduct);
+    final index = _products.indexWhere(
+      (product) => product.id == updatedProduct.id,
+    );
+    _products[index] = updatedProduct;
+    notifyListeners();
+  }
+
+  Future<void> deleteProduct(String productId) async {
+    _requireProduct(productId);
+    await _productRepository.delete(productId);
+    _products.removeWhere((product) => product.id == productId);
+    _quantities.remove(productId);
+    notifyListeners();
+  }
+
+  Future<void> clearStoreItems(String storeId) async {
+    _requireStore(storeId);
+    await _productRepository.clearStoreItems(storeId);
+    for (final product in getProductsForStore(storeId)) {
+      _quantities[product.id] = 0;
     }
     notifyListeners();
+  }
+
+  Store _requireStore(String storeId) {
+    return _stores.firstWhere(
+      (store) => store.id == storeId,
+      orElse: () => throw StateError('Store $storeId does not exist.'),
+    );
+  }
+
+  void _requireProduct(String productId) {
+    if (!_products.any((product) => product.id == productId)) {
+      throw StateError('Product $productId does not exist.');
+    }
   }
 }
