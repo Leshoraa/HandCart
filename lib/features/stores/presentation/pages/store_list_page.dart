@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+
 import '../../../../core/constants/app_dimens.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../core/widgets/empty_state_view.dart';
 import '../../../../core/widgets/google_settings_sheet.dart';
-import '../../../shopping_list/presentation/pages/store_product_list_page.dart';
+import '../../../shopping_list/data/models/presentation/pages/store_product_list_page.dart';
 import '../../../shopping_list/state/shopping_planner_controller.dart';
 import '../../../shopping_list/state/shopping_planner_scope.dart';
 import '../../data/models/store_model.dart';
@@ -49,17 +50,35 @@ class _StoreListPageState extends State<StoreListPage> {
     });
   }
 
-  void _handleTogglePin(ShoppingPlannerController planner, Store store) {
-    planner.togglePinStore(store.id);
-    final isNowPinned = !store.isPinned;
+  Future<void> _handleTogglePin(
+    ShoppingPlannerController planner,
+    Store store,
+  ) async {
+    try {
+      await planner.togglePinStore(store.id);
+      final isNowPinned = !store.isPinned;
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            isNowPinned
+                ? '${store.name} pinned to top'
+                : '${store.name} unpinned',
+          ),
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (error) {
+      _showStorageError(error);
+    }
+  }
+
+  void _showStorageError(Object error) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          isNowPinned
-              ? '${store.name} pinned to top'
-              : '${store.name} unpinned',
-        ),
-        duration: const Duration(seconds: 2),
+        content: Text('Unable to save changes: $error'),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -69,8 +88,9 @@ class _StoreListPageState extends State<StoreListPage> {
     AddStoreBottomSheet.show(
       context,
       storeToEdit: store,
-      onStoreUpdated: (updatedStore) {
-        planner.updateStore(updatedStore);
+      onStoreUpdated: (updatedStore) async {
+        await planner.updateStore(updatedStore);
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${updatedStore.name} updated'),
@@ -111,13 +131,18 @@ class _StoreListPageState extends State<StoreListPage> {
     );
 
     if (confirmed == true && mounted) {
-      planner.deleteStore(store.id);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${store.name} deleted'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      try {
+        await planner.deleteStore(store.id);
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${store.name} deleted'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      } catch (error) {
+        _showStorageError(error);
+      }
     }
   }
 
@@ -131,9 +156,7 @@ class _StoreListPageState extends State<StoreListPage> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => StoreProductListPage(store: store),
-          ),
+          MaterialPageRoute(builder: (_) => StoreProductListPage(store: store)),
         );
       },
       onPin: () => _handleTogglePin(planner, store),
@@ -155,9 +178,11 @@ class _StoreListPageState extends State<StoreListPage> {
     ];
 
     final filteredStores = planner.stores.where((store) {
-      final matchesCategory = _selectedCategory == AppStrings.allStores ||
+      final matchesCategory =
+          _selectedCategory == AppStrings.allStores ||
           store.category == _selectedCategory;
-      final matchesSearch = _searchQuery.isEmpty ||
+      final matchesSearch =
+          _searchQuery.isEmpty ||
           store.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           store.category.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           store.description.toLowerCase().contains(_searchQuery.toLowerCase());
@@ -166,8 +191,11 @@ class _StoreListPageState extends State<StoreListPage> {
 
     final Map<DateTime, List<Store>> groupedStores = {};
     for (final store in filteredStores) {
-      final dayKey =
-          DateTime(store.date.year, store.date.month, store.date.day);
+      final dayKey = DateTime(
+        store.date.year,
+        store.date.month,
+        store.date.day,
+      );
       groupedStores.putIfAbsent(dayKey, () => []).add(store);
     }
     final sortedDates = groupedStores.keys.toList()
@@ -188,8 +216,8 @@ class _StoreListPageState extends State<StoreListPage> {
         selectedIndex: _selectedCategory == AppStrings.allStores
             ? 0
             : (categories.skip(1).contains(_selectedCategory)
-                ? 2 + categories.skip(1).toList().indexOf(_selectedCategory)
-                : 0),
+                  ? 2 + categories.skip(1).toList().indexOf(_selectedCategory)
+                  : 0),
         onDestinationSelected: (idx) {
           final categoryCount = categories.length - 1;
           if (idx == 0) {
@@ -260,7 +288,10 @@ class _StoreListPageState extends State<StoreListPage> {
                 const SizedBox(height: 20),
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: colorScheme.surfaceContainerHigh,
                     borderRadius: BorderRadius.circular(16),
@@ -311,13 +342,15 @@ class _StoreListPageState extends State<StoreListPage> {
               ),
             ),
           ),
-          ...categories.skip(1).map(
-            (cat) => NavigationDrawerDestination(
-              icon: const Icon(Icons.label_outline_rounded),
-              selectedIcon: const Icon(Icons.label_rounded),
-              label: Text(cat),
-            ),
-          ),
+          ...categories
+              .skip(1)
+              .map(
+                (cat) => NavigationDrawerDestination(
+                  icon: const Icon(Icons.label_outline_rounded),
+                  selectedIcon: const Icon(Icons.label_rounded),
+                  label: Text(cat),
+                ),
+              ),
           const Divider(indent: 20, endIndent: 20),
           const NavigationDrawerDestination(
             icon: Icon(Icons.settings_outlined),
@@ -352,7 +385,9 @@ class _StoreListPageState extends State<StoreListPage> {
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('HandCart - Modern Material You Shopping Planner'),
+                  content: Text(
+                    'HandCart - Modern Material You Shopping Planner',
+                  ),
                   behavior: SnackBarBehavior.floating,
                 ),
               );
@@ -382,202 +417,247 @@ class _StoreListPageState extends State<StoreListPage> {
           ),
         ],
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppDimens.md,
-                AppDimens.xs,
-                AppDimens.md,
-                AppDimens.md,
-              ),
-              child: SearchBar(
-                controller: _searchController,
-                hintText: AppStrings.searchStoresHint,
-                elevation: const WidgetStatePropertyAll(0),
-                backgroundColor:
-                    WidgetStatePropertyAll(colorScheme.surfaceContainerHigh),
-                shape: const WidgetStatePropertyAll(StadiumBorder()),
-                padding: const WidgetStatePropertyAll(
-                  EdgeInsets.symmetric(horizontal: 16.0),
+      body: planner.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : planner.loadError != null
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.error_outline_rounded, size: 40),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Unable to load shopping data: ${planner.loadError}',
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                    FilledButton(
+                      onPressed: planner.initialize,
+                      child: const Text('Retry'),
+                    ),
+                  ],
                 ),
-                leading: _searchQuery.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.arrow_back_rounded),
-                        onPressed: () {
-                          _searchController.clear();
-                          setState(() {
-                            _searchQuery = '';
-                          });
-                        },
-                      )
-                    : Icon(
-                        Icons.search_rounded,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                trailing: [
-                  if (_searchQuery.isNotEmpty)
-                    IconButton(
-                      icon: const Icon(Icons.close_rounded),
-                      onPressed: () {
-                        _searchController.clear();
-                        setState(() {
-                          _searchQuery = '';
-                        });
-                      },
-                    ),
-                  IconButton(
-                    icon: const Icon(Icons.mic_rounded),
-                    onPressed: () {},
-                  ),
-                ],
-                onChanged: _onSearchChanged,
               ),
-            ),
-
-            Expanded(
-              child: CustomScrollView(
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: CategoryFilterBar(
-                      categories: categories,
-                      selectedCategory: _selectedCategory,
-                      onCategorySelected: _onCategorySelected,
+            )
+          : SafeArea(
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppDimens.md,
+                      AppDimens.xs,
+                      AppDimens.md,
+                      AppDimens.md,
                     ),
-                  ),
-
-                  if (filteredStores.isEmpty)
-                    SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: EmptyStateView(
-                        icon: Icons.storefront_outlined,
-                        title: AppStrings.noStoresFound,
-                        message: _searchQuery.isNotEmpty
-                            ? 'No stores match "$_searchQuery". Try clearing your search.'
-                            : 'No stores in this category yet. Tap Add Store to create one.',
-                        buttonLabel: _searchQuery.isNotEmpty ? 'Clear Search' : null,
-                        onButtonPressed: _searchQuery.isNotEmpty
-                            ? () {
+                    child: SearchBar(
+                      controller: _searchController,
+                      hintText: AppStrings.searchStoresHint,
+                      elevation: const WidgetStatePropertyAll(0),
+                      backgroundColor: WidgetStatePropertyAll(
+                        colorScheme.surfaceContainerHigh,
+                      ),
+                      shape: const WidgetStatePropertyAll(StadiumBorder()),
+                      padding: const WidgetStatePropertyAll(
+                        EdgeInsets.symmetric(horizontal: 16.0),
+                      ),
+                      leading: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.arrow_back_rounded),
+                              onPressed: () {
                                 _searchController.clear();
                                 setState(() {
                                   _searchQuery = '';
                                 });
-                              }
-                            : null,
-                      ),
-                    )
-                  else
-                    for (final date in sortedDates) ...[
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            AppDimens.md,
-                            AppDimens.lg,
-                            AppDimens.md,
-                            AppDimens.sm,
+                              },
+                            )
+                          : Icon(
+                              Icons.search_rounded,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                      trailing: [
+                        if (_searchQuery.isNotEmpty)
+                          IconButton(
+                            icon: const Icon(Icons.close_rounded),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() {
+                                _searchQuery = '';
+                              });
+                            },
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                DateFormatter.formatRelativeDate(date),
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: colorScheme.secondaryContainer,
-                                  borderRadius: BorderRadius.circular(
-                                      AppDimens.radiusFull),
-                                ),
-                                child: Text(
-                                  '${groupedStores[date]!.length} ${groupedStores[date]!.length == 1 ? "store" : "stores"}',
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: colorScheme.onSecondaryContainer,
-                                  ),
-                                ),
-                              ),
-                            ],
+                        IconButton(
+                          icon: const Icon(Icons.mic_rounded),
+                          onPressed: () {},
+                        ),
+                      ],
+                      onChanged: _onSearchChanged,
+                    ),
+                  ),
+
+                  Expanded(
+                    child: CustomScrollView(
+                      slivers: [
+                        SliverToBoxAdapter(
+                          child: CategoryFilterBar(
+                            categories: categories,
+                            selectedCategory: _selectedCategory,
+                            onCategorySelected: _onCategorySelected,
                           ),
                         ),
-                      ),
 
-                      SliverPadding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppDimens.md,
-                        ),
-                        sliver: SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (context, rowIndex) {
-                              final dateStores = groupedStores[date]!;
-                              final rowCount = (dateStores.length + 1) ~/ 2;
-                              final firstIndex = rowIndex * 2;
-                              final secondIndex = firstIndex + 1;
-                              final store1 = dateStores[firstIndex];
-                              final store2 = secondIndex < dateStores.length
-                                  ? dateStores[secondIndex]
-                                  : null;
-
-                              return Padding(
-                                padding: EdgeInsets.only(
-                                  bottom: rowIndex < rowCount - 1
-                                      ? 12.0
-                                      : 0.0,
+                        if (filteredStores.isEmpty)
+                          SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: EmptyStateView(
+                              icon: Icons.storefront_outlined,
+                              title: AppStrings.noStoresFound,
+                              message: _searchQuery.isNotEmpty
+                                  ? 'No stores match "$_searchQuery". Try clearing your search.'
+                                  : 'No stores in this category yet. Tap Add Store to create one.',
+                              buttonLabel: _searchQuery.isNotEmpty
+                                  ? 'Clear Search'
+                                  : null,
+                              onButtonPressed: _searchQuery.isNotEmpty
+                                  ? () {
+                                      _searchController.clear();
+                                      setState(() {
+                                        _searchQuery = '';
+                                      });
+                                    }
+                                  : null,
+                            ),
+                          )
+                        else
+                          for (final date in sortedDates) ...[
+                            SliverToBoxAdapter(
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  AppDimens.md,
+                                  AppDimens.lg,
+                                  AppDimens.md,
+                                  AppDimens.sm,
                                 ),
-                                child: IntrinsicHeight(
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: [
-                                      Expanded(
-                                        child: _buildStoreCard(
-                                          planner,
-                                          store1,
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      DateFormatter.formatRelativeDate(date),
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                            color: colorScheme.onSurfaceVariant,
+                                          ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: colorScheme.secondaryContainer,
+                                        borderRadius: BorderRadius.circular(
+                                          AppDimens.radiusFull,
                                         ),
                                       ),
-                                      const SizedBox(width: 12.0),
-                                      Expanded(
-                                        child: store2 != null
-                                            ? _buildStoreCard(
-                                                planner,
-                                                store2,
-                                              )
-                                            : const SizedBox.shrink(),
+                                      child: Text(
+                                        '${groupedStores[date]!.length} ${groupedStores[date]!.length == 1 ? "store" : "stores"}',
+                                        style: theme.textTheme.labelSmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                              color: colorScheme
+                                                  .onSecondaryContainer,
+                                            ),
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
-                              );
-                            },
-                            childCount: (groupedStores[date]!.length + 1) ~/ 2,
-                          ),
-                        ),
-                      ),
-                    ],
+                              ),
+                            ),
 
-                  const SliverToBoxAdapter(
-                    child: SizedBox(height: AppDimens.xl * 3),
+                            SliverPadding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppDimens.md,
+                              ),
+                              sliver: SliverList(
+                                delegate: SliverChildBuilderDelegate(
+                                  (context, rowIndex) {
+                                    final dateStores = groupedStores[date]!;
+                                    final rowCount =
+                                        (dateStores.length + 1) ~/ 2;
+                                    final firstIndex = rowIndex * 2;
+                                    final secondIndex = firstIndex + 1;
+                                    final store1 = dateStores[firstIndex];
+                                    final store2 =
+                                        secondIndex < dateStores.length
+                                        ? dateStores[secondIndex]
+                                        : null;
+
+                                    return Padding(
+                                      padding: EdgeInsets.only(
+                                        bottom: rowIndex < rowCount - 1
+                                            ? 12.0
+                                            : 0.0,
+                                      ),
+                                      child: IntrinsicHeight(
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.stretch,
+                                          children: [
+                                            Expanded(
+                                              child: _buildStoreCard(
+                                                planner,
+                                                store1,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12.0),
+                                            Expanded(
+                                              child: store2 != null
+                                                  ? _buildStoreCard(
+                                                      planner,
+                                                      store2,
+                                                    )
+                                                  : const SizedBox.shrink(),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  childCount:
+                                      (groupedStores[date]!.length + 1) ~/ 2,
+                                ),
+                              ),
+                            ),
+                          ],
+
+                        const SliverToBoxAdapter(
+                          child: SizedBox(height: AppDimens.xl * 3),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => AddStoreBottomSheet.show(
           context,
-          onStoreAdded: planner.addStore,
+          onStoreAdded: (store) async {
+            final messenger = ScaffoldMessenger.of(context);
+            await planner.addStore(store);
+            if (!mounted) return;
+            messenger.showSnackBar(
+              SnackBar(
+                content: Text('${store.name} added'),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          },
         ),
         elevation: AppDimens.elevationNone,
         shape: const StadiumBorder(),

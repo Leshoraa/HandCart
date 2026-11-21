@@ -1,155 +1,194 @@
 # HandCart
 
-## Overview
-HandCart is an expressive Material 3 shopping planner and expense tracker mobile application built with Flutter. It allows users to organize shopping lists across multiple stores and markets, track items in a vertical single-column layout with live quantity steppers, write shopping notes and memos per store, and calculate total estimated expenses in real-time.
+HandCart adalah aplikasi Android berbasis Flutter untuk merencanakan belanja
+berdasarkan toko. Pengguna dapat mengelola toko dan produk, mencatat jumlah
+barang serta catatan belanja, menghitung perkiraan total biaya, dan menyimpan
+foto produk dari kamera ke penyimpanan lokal aplikasi.
 
-## Features
-- **Store / Shopping Places Selection**:
-  - Initial screen displaying store cards (Supermarkets, Bakeries, Organic Marts, Convenience Stores).
-  - Search and filter stores by category chips.
-  - Live budget badge displaying the total planned shopping expense across all stores.
-  - Modal sheet to define and add new shopping places.
-- **Vertical Single-Column Product List**:
-  - Dedicated product list per store in a vertical 1-column layout for high density and rapid browsing.
-  - Realistic product imagery with organic squircle framing and fallback icons.
-  - Item name, short description, and unit price.
-  - Interactive stepper `[- 1 +]` to adjust planned quantities.
-  - Add custom items directly into the store list.
-- **Shopping Notes & Memos**:
-  - Note menu button in the top right of the store product page.
-  - Dedicated layout for writing store memos, checklists, coupons, and reminders.
-  - Displays total items planned and total expense for the store.
-- **Real-Time Total Expense Tracker**:
-  - Live calculation of total items and total expense for each store.
-  - Sticky bottom summary bar displaying real-time costs as quantities are adjusted.
-- **Material 3 Expressive Design**:
-  - Dynamic color adaptation (Material You) on supported Android devices.
-  - Eye-comfort neutral surfaces with deep emerald forest accents.
-  - Soft ambient drop shadows and responsive squircle geometry.
+## Tujuan aplikasi
 
-## Architecture
-HandCart follows a clean, feature-first modular architecture separating concerns across domain data, business logic state management, and presentation widgets:
-- **Core Layer (`lib/core/`)**: Cross-cutting constants, theme definitions, formatting utilities, and shared widgets.
-- **Feature Modules (`lib/features/`)**:
-  - `stores`: Store models, dummy data, store card widgets, and store selection pages.
-  - `shopping_list`: Product models, shopping planner controller, 1-column product tiles, note sheets, and expense bars.
-- **State Management**: Built with Flutter's native `ChangeNotifier` (`ShoppingPlannerController`) and `InheritedNotifier` (`ShoppingPlannerScope`), providing reactive state propagation without external framework overhead.
+Menyediakan daftar belanja yang terorganisasi per toko, tetap tersedia setelah
+aplikasi ditutup, dan dapat digunakan saat berbelanja tanpa bergantung pada
+backend atau akun daring.
 
-## Project Structure
+## Teknologi
+
+- Flutter dan Dart (batas SDK Dart pada `pubspec.yaml`: `^3.13.5`).
+- Material 3, tema terang/gelap, dan `dynamic_color`.
+- SQLite lokal melalui `sqflite`, dengan `path` dan `path_provider`.
+- Kamera/foto melalui `image_picker`.
+- State management Flutter bawaan: `ChangeNotifier` dan `InheritedNotifier`.
+
+## Fungsi utama
+
+- **Toko:** melihat, mencari, memfilter berdasarkan kategori, menambah,
+  mengedit, menghapus, serta pin/unpin toko.
+- **Produk per toko:** melihat dan mencari produk, menambah, mengedit, dan
+  menghapus produk.
+- **Jumlah belanja:** menambah atau mengurangi jumlah. Produk baru dimulai
+  dengan jumlah 1; mengurangi dari 1 mengubah jumlah menjadi 0.
+- **Perkiraan biaya:** menghitung dan menampilkan total per toko dari harga
+  produk dikalikan jumlahnya. Aplikasi belum menetapkan mata uang tertentu.
+- **Catatan:** menyimpan memo/checklist secara terpisah untuk setiap toko.
+
+## Fitur tambahan
+
+- Data contoh awal hanya dimasukkan ketika tabel toko masih kosong; aplikasi
+  tidak memasukkan ulang data contoh pada setiap pembukaan.
+- Foto produk dapat berasal dari kamera dan ditampilkan kembali dari file lokal.
+  Produk contoh juga dapat memakai URL gambar; bila gambar tidak tersedia,
+  antarmuka menggunakan ikon fallback.
+- Pencarian yang tidak menemukan hasil dibedakan dari daftar yang memang kosong.
+- Operasi penyimpanan menampilkan indikator, validasi, dan/atau feedback error
+  sesuai alurnya.
+- Warna dinamis digunakan bila tersedia; tema terang/gelap tetap memiliki
+  fallback.
+
+## Arsitektur aplikasi
+
+Alur utamanya:
+
+1. `main.dart` menjalankan `HandCartApp`.
+2. `HandCartApp` membuat dan menginisialisasi `ShoppingPlannerController`.
+3. `ShoppingPlannerScope` meneruskan perubahan controller ke widget UI.
+4. Controller memuat data melalui `StoreRepository` dan `ProductRepository`,
+   lalu memperbarui state setelah operasi repository berhasil.
+5. Kedua repository menggunakan `AppDatabase` untuk akses SQLite.
+
+Direktori penting:
+
 ```text
 lib/
-├── app.dart                                # MaterialApp root with DynamicColorBuilder
-├── main.dart                               # Application entry point & System UI styling
+├── main.dart
+├── app.dart
 ├── core/
+│   ├── database/app_database.dart
 │   ├── constants/
-│   │   ├── app_colors.dart                 # Brand colors & fallback palette
-│   │   ├── app_dimens.dart                 # Spacing, padding, and radii
-│   │   └── app_strings.dart                # Centralized string constants
 │   ├── theme/
-│   │   └── app_theme.dart                  # Material 3 light & dark ThemeData
 │   ├── utils/
-│   │   ├── currency_formatter.dart         # Standard currency formatting ($X.XX)
-│   │   └── date_formatter.dart             # Relative calendar date formatting
 │   └── widgets/
-│       └── empty_state_view.dart           # Reusable empty state placeholder
 └── features/
     ├── stores/
     │   ├── data/
-    │   │   ├── models/
-    │   │   │   └── store_model.dart        # Store data model
-    │   │   └── store_dummy_data.dart       # Curated stores and initial catalogs
     │   └── presentation/
-    │       ├── pages/
-    │       │   └── store_list_page.dart    # Store selection & search screen
-    │       └── widgets/
-    │           ├── add_store_bottom_sheet.dart # Custom store creator sheet
-    │           └── store_card.dart         # Elevated store card with budget badge
     └── shopping_list/
         ├── data/
-        │   └── models/
-        │       └── product_model.dart      # Product data model
-        ├── state/
-        │   ├── shopping_planner_controller.dart # State logic & expense computations
-        │   └── shopping_planner_scope.dart # InheritedNotifier state provider
-        └── presentation/
-            ├── pages/
-            │   └── store_product_list_page.dart # 1-column product list page
-            └── widgets/
-                ├── shopping_note_sheet.dart     # Shopping memo & checklist sheet
-                ├── shopping_product_tile.dart   # 1-column product row with stepper
-                └── store_expense_bottom_bar.dart# Live total expense bottom bar
+        │   └── models/presentation/
+        ├── services/
+        └── state/
 ```
 
-## Requirements
-- **Flutter SDK**: `>=3.10.0` (Dart SDK `>=3.0.0 <4.0.0`)
-- **Android**: Android SDK Platform 34+, Android Studio or CLI platform-tools.
-- **iOS**: macOS with Xcode 15+ and CocoaPods.
+Komponen utama berada di `lib/features/stores/` dan
+`lib/features/shopping_list/`. Controller memakai repository abstrak sehingga
+tes dapat mengganti penyimpanan native dengan repository in-memory.
 
-## Installation
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Leshoraa/HandCart.git
-   cd HandCart
-   ```
-2. Fetch dependencies:
-   ```bash
-   flutter pub get
-   ```
+## Implementasi SQLite
 
-## Configuration
-- Dynamic theming automatically adapts to user device wallpapers on Android 12+.
-- Theme constants and brand colors are configured in [`lib/core/constants/app_colors.dart`](lib/core/constants/app_colors.dart).
-- Strings and labels are maintained in [`lib/core/constants/app_strings.dart`](lib/core/constants/app_strings.dart).
+Database bernama `handcart.db` dan saat ini menggunakan skema versi 1. Tabel
+`stores` menyimpan identitas toko, kategori, deskripsi, ikon, URL gambar,
+catatan, tanggal pembuatan, dan status pin. Tabel `products` menyimpan
+`store_id`, nama, kategori, harga, deskripsi, ikon, URL/path gambar, dan jumlah.
 
-## Usage
-1. Launch the application:
-   ```bash
-   flutter run
-   ```
-2. On the initial screen, select a store card to open that store's shopping list.
-3. In the store product list, use `[- 1 +]` steppers to add or adjust quantities. The total shopping expense updates in real-time in the bottom bar.
-4. Tap the **Note** icon in the top right of the AppBar to write reminders, checklist items, or coupon codes for that store.
-5. Tap **Add Store** on the main screen to create custom shopping destinations.
+Relasi produk-ke-toko menggunakan foreign key dengan `ON DELETE CASCADE`.
+Foreign key diaktifkan saat database dikonfigurasi. Penghapusan toko menghapus
+produk terkait; controller juga menghapus jumlah produk tersebut dari state.
+Operasi CRUD dan perubahan jumlah dilakukan secara asynchronous. Data contoh
+diinisialisasi dalam transaksi saat tabel toko kosong.
 
-## Development
-- Use hot reload (`r`) or hot restart (`R`) in the active terminal to preview changes.
-- Ensure all business logic remains inside `ShoppingPlannerController` rather than page widgets.
+Model toko saat ini mendukung URL gambar, bukan path foto toko lokal. Path foto
+lokal hanya didukung oleh model produk.
 
-## Testing
-Run static analysis and the automated test suite:
-```bash
-# Run static analyzer
+## Implementasi kamera
+
+`ProductImageService` menggunakan `image_picker` untuk membuka kamera. Foto yang
+berhasil diambil disalin ke direktori dokumen aplikasi di dalam folder
+`product_images`; path-nya disimpan pada kolom `products.image_path`. Saat editor
+produk dibuka kembali, layanan juga mencoba memulihkan hasil kamera Android
+yatim (`retrieveLostData`).
+
+Pembatalan kamera menghasilkan `null`, sehingga foto lama tidak diganti.
+Kegagalan kamera atau penyalinan file diteruskan ke UI untuk diberi feedback.
+File foto lama tidak otomatis dihapus ketika foto diganti atau produknya
+dihapus; pembersihan file yatim belum diimplementasikan.
+
+Manifest utama Android menyertakan izin `INTERNET` untuk gambar toko/produk
+berbasis URL. Kamera memakai integrasi `image_picker`; belum ada uji kamera
+langsung pada perangkat dalam lingkungan pengembangan ini.
+
+## Rancangan UI/UX
+
+- Layar utama memakai kartu toko dua kolom, pencarian, filter kategori, indikator
+  pin, serta total rencana belanja.
+- Halaman toko memakai daftar produk satu kolom, pencarian, kontrol jumlah,
+  catatan toko, dan ringkasan total biaya di bagian bawah.
+- Form tambah/edit toko dan produk serta catatan menggunakan bottom sheet agar
+  alur utama tetap berada pada halaman terkait.
+- Desain menggunakan Material 3, tema terang/gelap, warna dinamis bila tersedia,
+  empty state, loading state, dan tampilan error/retry untuk pemuatan awal.
+
+## Pengujian dan hasil validasi
+
+Tes otomatis yang tersedia mencakup controller, pemetaan model produk,
+penanganan foto (batal, gagal, dan pemulihan), validasi form produk, penghapusan
+produk melalui UI, pembatalan penggantian foto, serta widget daftar toko.
+
+Hasil eksekusi terakhir:
+
+- `flutter analyze` — lulus, tidak ada temuan.
+- `flutter test` — lulus, 28 test.
+- `flutter build apk --debug` — belum berhasil dijalankan hingga tahap kompilasi:
+  Flutter melaporkan Android SDK tidak ditemukan. `ANDROID_HOME`/
+  `ANDROID_SDK_ROOT` belum tersedia, dan `adb` tidak ditemukan pada PATH.
+- `git diff --check` — lulus.
+
+Tes controller/widget menggunakan repository in-memory. Tes saat ini belum
+membuktikan persistensi SQLite melewati restart proses pada perangkat Android.
+Build APK dan uji kamera perlu diulang pada komputer/perangkat dengan Android
+SDK yang terpasang.
+
+## Cara menjalankan
+
+Pastikan Flutter/Dart sesuai batas SDK proyek dan Android SDK telah dikonfigurasi.
+
+```powershell
+flutter pub get
 flutter analyze
-
-# Run unit and widget tests
 flutter test
+flutter run
 ```
 
-## Build
-Compile release artifacts for target mobile platforms:
-- **Android APK**:
-  ```bash
-  flutter build apk --release
-  ```
-- **Android App Bundle**:
-  ```bash
-  flutter build appbundle
-  ```
-- **iOS**:
-  ```bash
-  flutter build ios --release
-  ```
+Untuk membuat APK debug:
 
-## Deployment
-- Release bundles are generated in `build/app/outputs/bundle/release/app-release.aab` for Google Play distribution.
+```powershell
+flutter build apk --debug
+```
 
-## Troubleshooting
-- **Dynamic colors not changing**: Ensure device is running Android 12+ and system wallpaper theming is enabled in system settings.
-- **Cache issues**: Run `flutter clean && flutter pub get`.
+## Audit akhir terhadap rubrik UAS
 
-## Known Limitations
-- Data is currently stored in-memory and re-initializes on complete application restart. Persistent database integration (e.g. SQLite / Hive) can be added as a next step.
+| Rubrik | Status | Bukti implementasi |
+|---|---|---|
+| Penyimpanan lokal atau online | Diimplementasikan | SQLite menyimpan toko, produk, jumlah, catatan, status pin, dan path foto produk. Persistensi lintas-restart masih perlu dibuktikan di perangkat. |
+| Minimal satu fitur perangkat mobile | Diimplementasikan pada kode | Kamera Android melalui `image_picker`; pengujian langsung di perangkat masih diperlukan. |
+| Deskripsi umum dan tujuan | Terdokumentasi | Bagian pengantar dan tujuan dokumen ini. |
+| Fungsi utama dan fitur tambahan | Terdokumentasi | Bagian fungsi utama dan fitur tambahan. |
+| Rancangan UI/UX | Terdokumentasi | Bagian rancangan UI/UX. |
 
-## Architecture Decisions
-- [ADR 0001: Shopping Planner State Management with InheritedNotifier](docs/adr/0001_state_management_architecture.md)
-- [ADR 0002: Material 3 Expressive Design and Dynamic Color System](docs/adr/0002_material_3_theming_and_design_system.md)
+## Batasan dan pekerjaan lanjutan
+
+- APK debug belum dapat diverifikasi di lingkungan ini karena Android SDK tidak
+  tersedia.
+- Perlu uji manual pada perangkat Android untuk alur kamera, pemulihan kamera,
+  tampilan foto lokal, dan persistensi SQLite setelah aplikasi ditutup/dibuka
+  kembali.
+- File foto yang sudah tidak direferensikan database belum dibersihkan otomatis.
+- Skema SQLite masih versi 1; perubahan skema di masa depan perlu disertai
+  migrasi versi.
+- Data contoh memakai gambar URL; tampilan gambar daring memerlukan koneksi
+  internet.
+
+## Kesimpulan
+
+HandCart telah menghubungkan state aplikasi dengan repository SQLite dan
+menyediakan alur foto produk lokal dari kamera. Kode lulus analyzer dan seluruh
+tes otomatis yang tersedia, tetapi APK Android dan perilaku pada perangkat
+belum dapat diverifikasi sampai Android SDK/perangkat uji tersedia.

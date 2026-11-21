@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_strings.dart';
-import '../../../../core/utils/currency_formatter.dart';
-import '../../../stores/data/models/store_model.dart';
-import '../../state/shopping_planner_scope.dart';
+
+import '../../../../../../core/constants/app_strings.dart';
+import '../../../../../../core/utils/currency_formatter.dart';
+import '../../../../../stores/data/models/store_model.dart';
+import '../../../../state/shopping_planner_scope.dart';
 
 class ShoppingNoteSheet extends StatefulWidget {
   final Store store;
 
-  const ShoppingNoteSheet({
-    super.key,
-    required this.store,
-  });
+  const ShoppingNoteSheet({super.key, required this.store});
 
   static Future<void> show(BuildContext context, Store store) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -32,6 +30,7 @@ class ShoppingNoteSheet extends StatefulWidget {
 
 class _ShoppingNoteSheetState extends State<ShoppingNoteSheet> {
   late final TextEditingController _noteController;
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -65,9 +64,30 @@ class _ShoppingNoteSheetState extends State<ShoppingNoteSheet> {
     }
   }
 
-  void _save(BuildContext context) {
+  Future<void> _save() async {
+    if (_isSaving) return;
+    setState(() {
+      _isSaving = true;
+    });
     final planner = ShoppingPlannerScope.of(context);
-    planner.updateStoreNote(widget.store.id, _noteController.text);
+    try {
+      await planner.updateStoreNote(widget.store.id, _noteController.text);
+    } catch (error) {
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Unable to save notes: $error'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
+    }
+
+    if (!mounted) return;
     Navigator.pop(context);
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -174,8 +194,14 @@ class _ShoppingNoteSheetState extends State<ShoppingNoteSheet> {
               width: double.infinity,
               height: 48,
               child: FilledButton.icon(
-                onPressed: () => _save(context),
-                icon: const Icon(Icons.check_rounded),
+                onPressed: _isSaving ? null : _save,
+                icon: _isSaving
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.check_rounded),
                 label: Text(
                   AppStrings.saveNotes,
                   style: theme.textTheme.labelLarge?.copyWith(
@@ -183,9 +209,7 @@ class _ShoppingNoteSheetState extends State<ShoppingNoteSheet> {
                     color: colorScheme.onPrimary,
                   ),
                 ),
-                style: FilledButton.styleFrom(
-                  shape: const StadiumBorder(),
-                ),
+                style: FilledButton.styleFrom(shape: const StadiumBorder()),
               ),
             ),
           ],
